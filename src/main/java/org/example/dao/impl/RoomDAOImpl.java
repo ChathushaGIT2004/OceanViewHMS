@@ -1,5 +1,6 @@
 package org.example.dao.impl;
 
+import org.example.Mappers.RoomMapper;
 import org.example.dao.RoomDAO;
 import org.example.Models.Room;
 import org.example.Config.DBConnection;
@@ -12,7 +13,7 @@ public class RoomDAOImpl implements RoomDAO {
 
     @Override
     public Room getRoomByType(String type) {
-
+       Room room;
         try {
             Connection conn = DBConnection.getInstance().getConnection();
 
@@ -23,11 +24,7 @@ public class RoomDAOImpl implements RoomDAO {
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
-                return new Room(
-                        rs.getInt("room_id"),
-                        rs.getString("type"),
-                        rs.getDouble("price")
-                );
+                room = RoomMapper.map(rs);
             }
 
         } catch (Exception e) {

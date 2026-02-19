@@ -1,20 +1,24 @@
 package org.example.Models;
 
-public class Room {
+class Room {
+    private int roomID;
+    private RoomType roomType;
+    private String roomStatus; // Available, Occupied, Maintenance
 
-    public int getRoomId() {
-        return roomId;
+    public int getRoomID() {
+        return roomID;
     }
 
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public RoomType getRoomType() {
+        return roomType;
     }
 
-    private int roomId;
-    private String roomType;
-    private double pricePerNight;
-    private boolean available;
+    public String getRoomStatus() {
+        return roomStatus;
+    }
 
-    public Room(int roomId, String type, double price) {
+    public void setRoomStatus(String roomStatus) {
+        this.roomStatus = roomStatus;
     }
 }
+

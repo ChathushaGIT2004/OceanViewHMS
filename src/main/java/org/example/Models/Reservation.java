@@ -1,38 +1,21 @@
 package org.example.Models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public class Reservation {
-
-
-    private int reservationId;
+class Reservation {
+    private int reservationID;
     private Guest guest;
-    private Room room;
-    private LocalDate checkInDate;
-    private LocalDate checkOutDate;
+    private LocalDateTime reservationDate;
+    private double totalAmount;
+    private String status; // Pending, Confirmed, Cancelled
 
-    public LocalDate getCheckInDate() {
-        return checkInDate;
+    public int getReservationID() {
+        return reservationID;
     }
 
-    public void setCheckInDate(LocalDate checkInDate) {
-        this.checkInDate = checkInDate;
-    }
-
-    public LocalDate getCheckOutDate() {
-        return checkOutDate;
-    }
-
-    public void setCheckOutDate(LocalDate checkOutDate) {
-        this.checkOutDate = checkOutDate;
-    }
-
-    public int getReservationId() {
-        return reservationId;
-    }
-
-    public void setReservationId(int reservationId) {
-        this.reservationId = reservationId;
+    public void setReservationID(int reservationID) {
+        this.reservationID = reservationID;
     }
 
     public Guest getGuest() {
@@ -43,14 +26,27 @@ public class Reservation {
         this.guest = guest;
     }
 
-    public Room getRoom() {
-        return room;
+    public LocalDateTime getReservationDate() {
+        return reservationDate;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setReservationDate(LocalDateTime reservationDate) {
+        this.reservationDate = reservationDate;
     }
 
+    public double getTotalAmount() {
+        return totalAmount;
+    }
 
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

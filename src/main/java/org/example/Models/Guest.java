@@ -1,36 +1,40 @@
 package org.example.Models;
 
-public class Guest {
-    private int guestId;
-    private String name;
-    private String address;
+class Guest {
+
+
+    private int guestID;
+    private String fullName;
+    private String NIC;
     private String contactNumber;
+    private String email;
 
-    public Guest(int guestId, String name, String address, String contact) {
+
+
+
+
+    public int getGuestID() {
+        return guestID;
     }
 
-    public int getGuestId() {
-        return guestId;
+    public void setGuestID(int guestID) {
+        this.guestID = guestID;
     }
 
-    public void setGuestId(int guestId) {
-        this.guestId = guestId;
+    public String getFullName() {
+        return fullName;
     }
 
-    public String getName() {
-        return name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getNIC() {
+        return NIC;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setNIC(String NIC) {
+        this.NIC = NIC;
     }
 
     public String getContactNumber() {
@@ -40,4 +44,14 @@ public class Guest {
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+
 }
