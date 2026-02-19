@@ -2,7 +2,7 @@ package org.example.Models;
 
 import java.time.LocalDateTime;
 
-class UserActivityLog {
+public class UserActivityLog {
     private int activityID;
     private int userID;
     private String actionType;        // Create, Update, Delete, Login, Logout
