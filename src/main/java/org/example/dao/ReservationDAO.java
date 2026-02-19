@@ -2,9 +2,15 @@ package org.example.dao;
 
 import org.example.Models.Reservation;
 
+
+import java.util.List;
+
+
 public interface ReservationDAO {
-
-    void addReservation(Reservation reservation);
-
-    Reservation getReservation(int reservationId);
+    Reservation findById(int reservationID);
+    List<Reservation> findByGuestId(int guestID);
+    List<Reservation> findAll();
+    void save(Reservation reservation);
+    void update(Reservation reservation);
+    void delete(int reservationID);
 }

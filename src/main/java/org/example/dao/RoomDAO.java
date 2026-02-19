@@ -2,7 +2,14 @@ package org.example.dao;
 
 import org.example.Models.Room;
 
-public interface RoomDAO {
+import java.util.List;
 
-    Room getRoomByType(String type);
+
+public interface RoomDAO {
+    Room findById(int roomID);
+    List<Room> findAll();
+    List<Room> findAvailableRooms();
+    void save(Room room);
+    void update(Room room);
+    void delete(int roomID);
 }
