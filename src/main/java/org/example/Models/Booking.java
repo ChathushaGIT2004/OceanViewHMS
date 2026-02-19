@@ -2,7 +2,7 @@ package org.example.Models;
 
 import java.time.LocalDate;
 
-class Booking {
+public class Booking {
     private int bookingID;
     private Reservation reservation;
     private Room room;

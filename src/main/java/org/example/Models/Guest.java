@@ -1,6 +1,6 @@
 package org.example.Models;
 
-class Guest {
+public class Guest {
 
 
     private int guestID;

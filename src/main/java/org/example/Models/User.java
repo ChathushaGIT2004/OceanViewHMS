@@ -1,6 +1,6 @@
 package org.example.Models;
 
-class User {
+public class User {
     private int userID;
     private String username;
     private String passwordHash;

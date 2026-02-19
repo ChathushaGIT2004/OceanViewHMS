@@ -3,7 +3,7 @@ package org.example.Models;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-class Reservation {
+public class Reservation {
     private int reservationID;
     private Guest guest;
     private LocalDateTime reservationDate;

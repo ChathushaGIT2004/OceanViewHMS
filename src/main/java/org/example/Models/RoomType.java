@@ -1,6 +1,6 @@
 package org.example.Models;
 
-class RoomType {
+public class RoomType {
     private int roomTypeID;
     private String typeName;
     private double chargePerNight;

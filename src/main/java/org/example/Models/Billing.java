@@ -1,6 +1,6 @@
 package org.example.Models;
 
-class Billing {
+public class Billing {
     private int billID;
     private Reservation reservation;
     private String paymentMethod;

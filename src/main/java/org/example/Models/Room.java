@@ -1,6 +1,6 @@
 package org.example.Models;
 
-class Room {
+public class Room {
     private int roomID;
     private RoomType roomType;
     private String roomStatus; // Available, Occupied, Maintenance
