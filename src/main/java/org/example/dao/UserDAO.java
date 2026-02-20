@@ -1,7 +1,7 @@
 package org.example.dao;
 
 
-import org.example.Models.User;
+import org.example.Models.User.User;
 
 import java.util.List;
 

@@ -2,7 +2,7 @@ package org.example.dao;
 
 
 import java.util.List;
-import org.example.Models.UserActivityLog;
+import org.example.Models.User.UserActivityLog;
 
 public interface UserActivityLogDAO {
     UserActivityLog findById(int activityID);

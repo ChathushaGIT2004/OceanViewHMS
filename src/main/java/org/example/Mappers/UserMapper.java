@@ -5,13 +5,11 @@ package org.example.Mappers;
 
 
 
-import org.example.Models.User;
+import org.example.Models.User.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
