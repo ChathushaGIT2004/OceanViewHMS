@@ -12,4 +12,6 @@ public interface GuestDAO {
     void save(Guest guest);
     void update(Guest guest);
     void delete(int guestID);
+
+    Guest findByNIC(String nic);
 }

@@ -1,60 +1,77 @@
 package org.example.dao.impl;
 
-import org.example.dao.GuestDAO;
+import java.net.http.HttpHeaders;
+import java.util.List;
+
+import org.example.Mappers.GuestMapper;
 import org.example.Models.Guest;
+import org.example.dao.GuestDAO;
 import org.example.Config.DBConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class GuestDAOImpl implements GuestDAO {
 
-    @Override
-    public void addGuest(Guest guest) {
+    private Connection conn;
 
+    public GuestDAOImpl() {
         try {
-            Connection conn = DBConnection.getInstance().getConnection();
-
-            String sql = "INSERT INTO guests(name, address, contact) VALUES(?,?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
-
-            pst.setString(1, guest.getName());
-            pst.setString(2, guest.getAddress());
-            pst.setString(3, guest.getContactNumber());
-
-            pst.executeUpdate();
-
-        } catch (Exception e) {
+            conn = DBConnection.getInstance().getConnection();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public Guest getGuestById(int guestId) {
-
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-
-            String sql = "SELECT * FROM guests WHERE guest_id = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, guestId);
-
-            ResultSet rs = pst.executeQuery();
-
+    public Guest findById(int guestID) {
+        String sql = "SELECT * FROM Guests WHERE GuestID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, guestID);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new Guest(
-                        rs.getInt("guest_id"),
-                        rs.getString("name"),
-                        rs.getString("address"),
-                        rs.getString("contact")
-                );
+                return  GuestMapper.map(rs);
             }
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
+    }
 
+    @Override
+    public List<Guest> findAll() {
+        return List.of();
+    }
+
+    @Override
+    public void save(Guest guest) {
+
+    }
+
+    @Override
+    public void update(Guest guest) {
+
+    }
+
+    @Override
+    public void delete(int guestID) {
+
+    }
+
+    @Override
+    public Guest findByNIC(String nic) {
+        String sql = "SELECT * FROM Guests WHERE NIC = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nic);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return GuestMapper.map(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

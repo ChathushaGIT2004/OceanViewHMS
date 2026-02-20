@@ -1,36 +1,126 @@
 package org.example.dao.impl;
 
+
 import org.example.Mappers.RoomMapper;
+import org.example.Models.Room.Room;
 import org.example.dao.RoomDAO;
-import org.example.Models.Room;
+
+import java.util.List;
+
 import org.example.Config.DBConnection;
+
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class RoomDAOImpl implements RoomDAO {
 
-    @Override
-    public Room getRoomByType(String type) {
-       Room room;
+    private Connection conn;
+
+    public RoomDAOImpl() {
         try {
-            Connection conn = DBConnection.getInstance().getConnection();
-
-            String sql = "SELECT * FROM rooms WHERE type = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, type);
-
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                room = RoomMapper.map(rs);
-            }
-
-        } catch (Exception e) {
+            conn = DBConnection.getInstance().getConnection();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    @Override
+    public Room findById(int roomID) {
+        String sql = "SELECT * FROM Rooms WHERE RoomID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roomID);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return RoomMapper.map(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Room> findAll() {
+        String sql = "SELECT * FROM Rooms";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            return RoomMapper.mapList(rs); // Mapper handles ResultSet -> List<Room>
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Room> findAvailableRooms() {
+        return List.of();
+    }
+
+    @Override
+    public void save(Room room) {
+        String sql = "INSERT INTO Rooms(RoomID, RoomTypeID, RoomStatus) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, room.getRoomID());
+            ps.setInt(2, room.getRoomType());
+            ps.setString(3, room.getRoomStatus());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Room room) {
+        String sql = "UPDATE Rooms SET RoomTypeID=?, RoomStatus=? WHERE RoomID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, room.getRoomType());
+            ps.setString(2, room.getRoomStatus());
+            ps.setInt(3, room.getRoomID());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void delete(int roomID) {
+        String sql = "DELETE FROM Rooms WHERE RoomID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roomID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Room> findByRoomType(int roomTypeID) {
+        String sql = "SELECT * FROM Rooms WHERE RoomTypeID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roomTypeID);
+            ResultSet rs = ps.executeQuery();
+            return RoomMapper.mapList(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Room> findByStatus(String status) {
+        String sql = "SELECT * FROM Rooms WHERE RoomStatus = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+            return RoomMapper.mapList(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

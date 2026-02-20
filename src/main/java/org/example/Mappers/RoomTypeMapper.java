@@ -1,12 +1,11 @@
 package org.example.Mappers;
 
-import org.example.Models.RoomType;
+import org.example.Models.Room.RoomType;
 
 import java.sql.SQLException;
 
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 

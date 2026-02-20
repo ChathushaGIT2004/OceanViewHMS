@@ -1,4 +1,6 @@
-package org.example.Models;
+package org.example.Mappers;
+
+import org.example.Models.Guest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +10,7 @@ import java.util.List;
 public class GuestMapper {
 
 
-    public static Guest map(ResultSet rs) throws SQLException {
+    public  static Guest map(ResultSet rs) throws SQLException {
         Guest guest = new Guest();
         guest.setGuestID(rs.getInt("GuestID"));
         guest.setFullName(rs.getString("FullName"));

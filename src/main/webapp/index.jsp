@@ -626,7 +626,7 @@
                 <h3 class="card-title">New Reservation</h3>
             </div>
             <div class="card-content">
-                <p>Create a new booking with our streamlined reservation process.</p>
+                <p>Create a new roomAllocation with our streamlined reservation process.</p>
                 <ul class="feature-list">
                     <li>Real-time room availability</li>
                     <li>Guest preferences</li>
@@ -648,7 +648,7 @@
                 <h3 class="card-title">Reservations</h3>
             </div>
             <div class="card-content">
-                <p>Manage and monitor all current and upcoming bookings.</p>
+                <p>Manage and monitor all current and upcoming roomAllocations.</p>
                 <ul class="feature-list">
                     <li>Check-in/out management</li>
                     <li>Modify reservations</li>

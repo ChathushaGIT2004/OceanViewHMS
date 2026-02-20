@@ -1,48 +1,55 @@
 package org.example.Mappers;
 
-
-
-
 import org.example.Models.Guest;
 import org.example.Models.Reservation;
-import org.example.dao.GuestDAO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationMapper {
 
-
+    // Map a single reservation WITH full guest info
     public static Reservation map(ResultSet rs) throws SQLException {
-        Reservation reservation = new Reservation();
-        reservation.setReservationID(rs.getInt("ReservationID"));
 
-        // Fetch Guest object using GuestID
-        int guestID = rs.getInt("GuestID");
-        Guest guest = GuestDAO.findById (guestID); // You need this DAO method
-        reservation.setGuest(guest);
+        Reservation res = new Reservation();
+        res.setReservationID(rs.getInt("ReservationID"));
 
-        // Convert SQL Timestamp to LocalDateTime
-        java.sql.Timestamp timestamp = rs.getTimestamp("ReservationDate");
-        if (timestamp != null) {
-            reservation.setReservationDate(timestamp.toLocalDateTime());
+        // ---------- Guest Mapping ----------
+        Guest guest = new Guest();
+        guest.setGuestID(rs.getInt("GuestID"));
+        guest.setFullName(rs.getString("FullName"));
+        guest.setNIC(rs.getString("NIC"));
+        guest.setContactNumber(rs.getString("ContactNumber"));
+        guest.setEmail(rs.getString("Email"));
+
+        res.setGuest(guest);
+
+        // ---------- Reservation Details ----------
+        if (rs.getTimestamp("ReservationDate") != null) {
+            res.setReservationDate(
+                    rs.getTimestamp("ReservationDate").toLocalDateTime()
+            );
         }
 
-        reservation.setTotalAmount(rs.getDouble("TotalAmount"));
-        reservation.setStatus(rs.getString("Status"));
+        res.setTotalAmount(rs.getDouble("TotalAmount"));
+        res.setStatus(rs.getString("Status"));
 
-        return reservation;
+
+        res.setRoomAllocationList(new ArrayList<>());
+
+        return res;
     }
 
-
     public static List<Reservation> mapList(ResultSet rs) throws SQLException {
-        List<Reservation> reservations = new ArrayList<>();
+
+        List<Reservation> list = new ArrayList<>();
+
         while (rs.next()) {
-            reservations.add(map(rs));
+            list.add(map(rs));
         }
-        return reservations;
+
+        return list;
     }
 }
