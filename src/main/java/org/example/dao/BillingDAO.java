@@ -1,6 +1,6 @@
 package org.example.dao;
 
-import org.example.Models.Billing;
+import org.example.Models.Billings.Billing;
 import java.util.List;
 
 

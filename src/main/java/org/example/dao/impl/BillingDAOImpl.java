@@ -1,32 +1,39 @@
 package org.example.dao.impl;
 
-import org.example.Config.DBConnection;
-import org.example.Models.Billing;
+import org.example.Models.Billings.Billing;
 import org.example.dao.BillingDAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class BillingDAOImpl implements BillingDAO {
 
     @Override
-    public void saveBill(Billing bill) {
+    public Billing findById(int billID) {
+        return null;
+    }
 
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
+    @Override
+    public List<Billing> findByReservationId(int reservationID) {
+        return new ArrayList<>();
+    }
 
-            String sql = "INSERT INTO bills(reservation_id, total) VALUES(?,?)";
-            PreparedStatement pst = conn.prepareStatement(sql);
+    @Override
+    public List<Billing> findAll() {
+        return new ArrayList<>();
+    }
 
-            pst.setInt(1, bill.getBillId());
-            pst.setDouble(2, bill.getAmount());
+    @Override
+    public void save(Billing billing) {
+    }
 
-            pst.executeUpdate();
+    @Override
+    public void update(Billing billing) {
+    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void delete(int billID) {
     }
 }
 
