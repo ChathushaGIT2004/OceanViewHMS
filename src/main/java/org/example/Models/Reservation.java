@@ -1,14 +1,19 @@
 package org.example.Models;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import org.example.Models.Billings.BillableItem;
+import org.example.Models.Room.RoomAllocation;
 
-public class Reservation {
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class Reservation implements BillableItem {
     private int reservationID;
     private Guest guest;
     private LocalDateTime reservationDate;
     private double totalAmount;
     private String status; // Pending, Confirmed, Cancelled
+
+     private List<RoomAllocation> roomAllocationList;
 
     public int getReservationID() {
         return reservationID;
@@ -48,5 +53,28 @@ public class Reservation {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<RoomAllocation> getRoomAllocationList() {
+        return roomAllocationList;
+    }
+
+    public void setRoomAllocationList(List<RoomAllocation> roomAllocationList) {
+        this.roomAllocationList = roomAllocationList;
+    }
+
+    @Override
+    public int getId() {
+        return reservationID;
+    }
+
+    @Override
+    public String getItemType() {
+        return "reservation";
+    }
+
+    @Override
+    public double getPrice() {
+        return totalAmount;
     }
 }

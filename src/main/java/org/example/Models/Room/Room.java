@@ -1,15 +1,15 @@
-package org.example.Models;
+package org.example.Models.Room;
 
 public class Room {
     private int roomID;
-    private RoomType roomType;
+    private int roomType;
     private String roomStatus; // Available, Occupied, Maintenance
 
     public int getRoomID() {
         return roomID;
     }
 
-    public RoomType getRoomType() {
+    public int getRoomType() {
         return roomType;
     }
 
@@ -19,6 +19,14 @@ public class Room {
 
     public void setRoomStatus(String roomStatus) {
         this.roomStatus = roomStatus;
+    }
+
+    public void setRoomID(int roomID) {
+        this.roomID = roomID;
+    }
+
+    public void setRoomType(int roomType) {
+        this.roomType = roomType;
     }
 }
 

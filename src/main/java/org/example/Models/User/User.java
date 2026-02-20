@@ -1,4 +1,4 @@
-package org.example.Models;
+package org.example.Models.User;
 
 public class User {
     private int userID;
