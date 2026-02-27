@@ -1,4 +1,4 @@
-package org.example.Exceptions;
+package org.example.Models.Exceptions;
 
 import java.io.File;
 import java.io.FileWriter;
