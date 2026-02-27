@@ -73,7 +73,7 @@ public class UserActivityLogDAOImpl implements UserActivityLogDAO {
             ps.setInt(1, log.getUserID());
             ps.setString(2, log.getActionType());
             ps.setString(3, log.getActionTarget());
-            if (log.getTargetReferenceID()=!null) {
+            if (log.getTargetReferenceID() != -1) {
                 ps.setInt(4, log.getTargetReferenceID());
             } else {
                 ps.setNull(4, java.sql.Types.INTEGER);
