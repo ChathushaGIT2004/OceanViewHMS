@@ -70,14 +70,14 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public void save(User user) {
         String sql = "INSERT INTO Users(username, passwordHash, fullName, role, email, status) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
-            ps.setString(6, user.getEmail());
-            ps.setString(7, user.getStatus());
+            ps.setString(5, user.getEmail());
+            ps.setString(6, user.getStatus());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,7 +86,7 @@ public class UserDAOImpl implements UserDAO {
 
     @Override
     public void update(User user) {
-        String sql = "UPDATE Users SET username=?, passwordHash=?, fullName=?, role=?, contactNumber=?, email=?, status=? " +
+        String sql = "UPDATE Users SET username=?, passwordHash=?, fullName=?, role=?, email=?, status=? " +
                 "WHERE userID=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
@@ -94,9 +94,9 @@ public class UserDAOImpl implements UserDAO {
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
 
-            ps.setString(6, user.getEmail());
-            ps.setString(7, user.getStatus());
-            ps.setInt(8, user.getUserID());
+            ps.setString(5, user.getEmail());
+            ps.setString(6, user.getStatus());
+            ps.setInt(7, user.getUserID());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
