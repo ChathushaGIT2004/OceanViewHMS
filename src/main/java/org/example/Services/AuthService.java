@@ -10,11 +10,15 @@ import org.example.dao.impl.UserActivityLogDAOImpl;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class AuthService {
 
     private UserDAO userDAO;
     private UserActivityLogDAO activityLogDAO;
+
+    // 🔥 session storage (token -> userID)
+    private Map<String, Integer> activeSessions = new HashMap<>();
 
     public AuthService() {
         this.userDAO = new UserDAOImpl();
@@ -25,6 +29,7 @@ public class AuthService {
         Map<String, Object> result = new HashMap<>();
         boolean success = false;
         String message = "";
+        String token = null;
 
         User user = userDAO.findByUsername(username);
 
@@ -33,6 +38,13 @@ public class AuthService {
                 if (user.getRole().equalsIgnoreCase(role)) {
                     success = true;
                     message = "Login successful";
+
+
+                    token = UUID.randomUUID().toString();
+
+
+                    activeSessions.put(token, user.getUserID());
+
                 } else {
                     message = "Login failed - Incorrect role";
                 }
@@ -49,9 +61,22 @@ public class AuthService {
 
         result.put("success", success);
         result.put("message", message);
+
+        if (success) {
+            result.put("token", token);
+            result.put("userID", user.getUserID());
+        }
+
         return result;
     }
 
+    public Integer getUserIdFromToken(String token) {
+        return activeSessions.get(token);
+    }
+
+    public void logout(String token) {
+        activeSessions.remove(token);
+    }
 
     private void saveLoginActivity(User user, boolean success, String message) {
         UserActivityLog log = new UserActivityLog();
