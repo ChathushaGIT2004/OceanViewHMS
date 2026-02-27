@@ -49,7 +49,7 @@ public class Exception {
                 ", Details: " + errorDetails;
     }
 
-    // ======= Add exception to stack AND log to file =======
+    //  Add exception to stack AND log to file
     public static void pushException(int code, String message, String details, ExceptionType type) {
         Exception exception = new Exception(code, message, details, type);
         exceptionStack.push(exception);
