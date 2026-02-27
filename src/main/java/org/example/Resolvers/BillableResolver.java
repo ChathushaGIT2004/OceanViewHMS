@@ -2,7 +2,7 @@ package org.example.Resolvers;
 
 import java.sql.Connection;
 
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 import org.example.dao.impl.ReservationDAOImpl;
 import org.example.dao.impl.RoomAllocationDAOImpl;
 

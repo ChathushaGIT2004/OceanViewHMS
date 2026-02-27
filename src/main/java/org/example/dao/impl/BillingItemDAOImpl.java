@@ -2,7 +2,7 @@ package org.example.dao.impl;
 
 import org.example.Models.Billings.BillingItem;
 import org.example.Mappers.BillingItemMapper;
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 import org.example.dao.BillingItemDAO;
 
 import java.sql.*;

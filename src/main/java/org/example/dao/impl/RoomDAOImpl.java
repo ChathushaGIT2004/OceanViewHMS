@@ -7,7 +7,7 @@ import org.example.dao.RoomDAO;
 
 import java.util.List;
 
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 
 
 import java.sql.Connection;

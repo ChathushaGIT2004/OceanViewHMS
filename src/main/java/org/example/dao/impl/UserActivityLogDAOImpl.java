@@ -2,7 +2,7 @@ package org.example.dao.impl;
 
 
 
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 import org.example.Mappers.UserActivityLogMapper;
 import org.example.Models.User.UserActivityLog;
 import org.example.dao.UserActivityLogDAO;

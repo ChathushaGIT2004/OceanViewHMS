@@ -1,6 +1,6 @@
 package org.example.dao.impl;
 
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 import org.example.Mappers.UserMapper;
 import org.example.Models.User.User;
 import org.example.dao.UserDAO;

@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 
 import java.sql.Connection;
 

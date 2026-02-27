@@ -3,7 +3,7 @@ package org.example.dao.impl;
 import org.example.Models.Room.RoomType;
 import org.example.dao.RoomTypeDAO;
 import org.example.Mappers.RoomTypeMapper;
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 
 import java.sql.*;
 import java.util.List;

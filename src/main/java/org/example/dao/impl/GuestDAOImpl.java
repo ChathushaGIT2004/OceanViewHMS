@@ -1,12 +1,11 @@
 package org.example.dao.impl;
 
-import java.net.http.HttpHeaders;
 import java.util.List;
 
 import org.example.Mappers.GuestMapper;
 import org.example.Models.Guest;
 import org.example.dao.GuestDAO;
-import org.example.Config.DBConnection;
+import org.example.Util.DBConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
