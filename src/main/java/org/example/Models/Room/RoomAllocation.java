@@ -6,8 +6,7 @@ public class RoomAllocation {
     private int AllocationID;
     private int reservationId;
     private Room room;
-    private LocalDate checkInDate;
-    private LocalDate checkOutDate;
+
     private String allocationStatus; // Reserved, Checked-in, Checked-out
 
     public String getAllocationStatus() {
@@ -42,21 +41,7 @@ public class RoomAllocation {
         this.room = room;
     }
 
-    public LocalDate getCheckInDate() {
-        return checkInDate;
-    }
 
-    public void setCheckInDate(LocalDate checkInDate) {
-        this.checkInDate = checkInDate;
-    }
-
-    public LocalDate getCheckOutDate() {
-        return checkOutDate;
-    }
-
-    public void setCheckOutDate(LocalDate checkOutDate) {
-        this.checkOutDate = checkOutDate;
-    }
 
 
 }

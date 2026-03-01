@@ -3,6 +3,8 @@ package org.example.Models;
 import org.example.Models.Billings.BillableItem;
 import org.example.Models.Room.RoomAllocation;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,6 +12,9 @@ public class Reservation implements BillableItem {
     private int reservationID;
     private Guest guest;
     private LocalDateTime reservationDate;
+    private Timestamp checkInDate;
+    private Timestamp checkOutDate;
+    private int numberOfGuests;
     private double totalAmount;
     private String status; // Pending, Confirmed, Cancelled
 
@@ -76,5 +81,30 @@ public class Reservation implements BillableItem {
     @Override
     public double getPrice() {
         return totalAmount;
+    }
+
+
+    public Timestamp getCheckInDate() {
+        return checkInDate;
+    }
+
+    public void setCheckInDate(Timestamp checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
+    public Timestamp getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public void setCheckOutDate(Timestamp checkOutDate) {
+        this.checkOutDate = checkOutDate;
+    }
+
+    public int getNumberOfGuests() {
+        return numberOfGuests;
+    }
+
+    public void setNumberOfGuests(int numberOfGuests) {
+        this.numberOfGuests = numberOfGuests;
     }
 }
