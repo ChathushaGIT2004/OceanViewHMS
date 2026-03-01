@@ -14,23 +14,15 @@ public class RoomAllocationMapper {
 
         RoomAllocation allocation = new RoomAllocation();
 
-        allocation.setAllocationID(rs.getInt("BookingID"));
+        allocation.setAllocationID(rs.getInt("ReservationID"));
 
         // ---- Room Mapping ----
         Room room = new Room();
         room.setRoomID(rs.getInt("RoomID"));
         allocation.setRoom(room);
 
-        // ---- Dates ----
-        if (rs.getDate("CheckInDate") != null) {
-            allocation.setCheckInDate(rs.getDate("CheckInDate").toLocalDate());
-        }
 
-        if (rs.getDate("CheckOutDate") != null) {
-            allocation.setCheckOutDate(rs.getDate("CheckOutDate").toLocalDate());
-        }
-
-        allocation.setAllocationStatus (rs.getString("BookingStatus"));
+        allocation.setAllocationStatus (rs.getString("AllocationStatus"));
 
         return allocation;
     }

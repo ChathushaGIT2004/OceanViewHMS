@@ -24,6 +24,9 @@ public class ReservationMapper {
         guest.setContactNumber(rs.getString("ContactNumber"));
         guest.setEmail(rs.getString("Email"));
 
+
+
+
         res.setGuest(guest);
 
         // ---------- Reservation Details ----------
@@ -33,8 +36,19 @@ public class ReservationMapper {
             );
         }
 
+
+        if (rs.getDate("CheckInDate") != null) {
+            res.setCheckInDate(rs.getTimestamp("CheckInDate"));
+        }
+
+        if (rs.getDate("CheckOutDate") != null) {
+            res.setCheckOutDate(rs.getTimestamp ("CheckOutDate"));
+        }
+
+
         res.setTotalAmount(rs.getDouble("TotalAmount"));
         res.setStatus(rs.getString("Status"));
+        res.setNumberOfGuests(rs.getInt("NumberOfGuests"));
 
 
         res.setRoomAllocationList(new ArrayList<>());
