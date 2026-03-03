@@ -30,4 +30,8 @@ public class SessionManager {
     public static void invalidateSession(String token) {
         sessions.remove(token);
     }
+
+    public static boolean isValidToken(String token) {
+        return token != null && !token.isEmpty() && sessions.containsKey(token);
+    }
 }

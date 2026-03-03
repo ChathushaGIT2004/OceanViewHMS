@@ -32,6 +32,7 @@ public class AuthService {
         String token = null;
 
         User user = userDAO.findByUsername(username);
+        System.out.println(user);
 
         if (user != null) {
             if (user.getPasswordHash().equals(password)) {
