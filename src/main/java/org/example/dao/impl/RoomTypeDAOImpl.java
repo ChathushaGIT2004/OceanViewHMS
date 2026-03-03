@@ -13,6 +13,7 @@ public class RoomTypeDAOImpl implements RoomTypeDAO {
 
     @Override
     public RoomType findById(int roomTypeID) {
+        System.out.println("Room type DAO Method accessed");
         String sql = "SELECT * FROM RoomType WHERE RoomTypeID = ?";
 
         try {
@@ -23,6 +24,9 @@ public class RoomTypeDAOImpl implements RoomTypeDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                System.out.println("Room type fetched");
+                RoomType roomType=RoomTypeMapper.map(rs);
+
                 return RoomTypeMapper.map(rs);
             }
 

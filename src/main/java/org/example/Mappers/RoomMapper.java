@@ -11,10 +11,12 @@ public class RoomMapper {
 
     // Map single Room (store only roomTypeID in Room class if you want)
     public static Room map(ResultSet rs) throws SQLException {
+       System.out.println("Room Mapper Accessed");
         Room room = new Room();
         room.setRoomID(rs.getInt("RoomID"));
         room.setRoomType(rs.getInt("RoomTypeID"));
         room.setRoomStatus(rs.getString("RoomStatus"));
+        System.out.println("Room Mapped"+room.getRoomID()+room.getRoomType() );
         return room;
     }
 

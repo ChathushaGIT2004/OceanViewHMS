@@ -12,12 +12,15 @@ import java.util.List;
 public class RoomTypeMapper {
 
     public static RoomType map(ResultSet rs) throws SQLException {
+        System.out.println("Roomtype Mapper Accessed");
         RoomType roomType = new RoomType();
         roomType.setRoomTypeID(rs.getInt("RoomTypeID"));
         roomType.setTypeName(rs.getString("TypeName"));
         roomType.setChargePerNight(rs.getDouble("ChargePerNight"));
         roomType.setOccupancyLimit(rs.getInt("OccupancyLimit"));
+        System.out.println("Roomtype Mapped :" +roomType.getTypeName()+ roomType.getChargePerNight());
         return roomType;
+
     }
 
     public static List<RoomType> mapList(ResultSet rs) throws SQLException {

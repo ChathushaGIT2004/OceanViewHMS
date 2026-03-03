@@ -21,14 +21,16 @@ public class RoomDAOImpl implements RoomDAO {
 
     public RoomDAOImpl() {
         try {
-            conn = DBConnection.getInstance().getConnection();
+            this.conn = DBConnection.getInstance().getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+
     @Override
     public Room findById(int roomID) {
+        System.out.println("Accessed RoomDAO method");
         String sql = "SELECT * FROM Rooms WHERE RoomID = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roomID);
@@ -48,7 +50,7 @@ public class RoomDAOImpl implements RoomDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
-            return RoomMapper.mapList(rs); // Mapper handles ResultSet -> List<Room>
+            return RoomMapper.mapList(rs);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,7 +60,16 @@ public class RoomDAOImpl implements RoomDAO {
 
     @Override
     public List<Room> findAvailableRooms() {
-        return List.of();
+        String sql = "SELECT * FROM rooms WHERE RoomStatus='Available' ";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            return RoomMapper.mapList(rs); // Mapper handles ResultSet -> List<Room>
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
