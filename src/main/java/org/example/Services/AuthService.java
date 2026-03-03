@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.example.Util.PasswordUtil.hashPassword;
+
 public class AuthService {
 
     private final UserDAO userDAO;
@@ -33,14 +35,17 @@ public class AuthService {
 
         User user = userDAO.findByUsername(username);
 
+
+
+
         if (user != null) {
-            if (user.getPasswordHash().equals(password)) {
+            if (user.getPasswordHash().equals(hashPassword( password))) {
                 if (user.getRole().equalsIgnoreCase(role)) {
                     success = true;
                     message = "Login successful";
 
 
-                    token = SessionManager.createSession(user.getUserID());
+                    token = SessionManager.createSession(user.getUserID(),user.getRole());
                     System.out.println("Authservise session token"+token);
 
                 } else {
