@@ -2,6 +2,7 @@ package org.example.Services;
 
 import org.example.Models.User.User;
 import org.example.Models.User.UserActivityLog;
+import org.example.Util.SessionManager;
 import org.example.dao.UserDAO;
 import org.example.dao.UserActivityLogDAO;
 import org.example.dao.impl.UserDAOImpl;
@@ -10,21 +11,20 @@ import org.example.dao.impl.UserActivityLogDAOImpl;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class AuthService {
 
-    private UserDAO userDAO;
-    private UserActivityLogDAO activityLogDAO;
-
-    // 🔥 session storage (token -> userID)
-    private Map<String, Integer> activeSessions = new HashMap<>();
+    private final UserDAO userDAO;
+    private final UserActivityLogDAO activityLogDAO;
 
     public AuthService() {
         this.userDAO = new UserDAOImpl();
         this.activityLogDAO = new UserActivityLogDAOImpl();
     }
 
+    /**
+     * Logs in the user and creates a session using SessionManager
+     */
     public Map<String, Object> login(String username, String password, String role) {
         Map<String, Object> result = new HashMap<>();
         boolean success = false;
@@ -32,7 +32,6 @@ public class AuthService {
         String token = null;
 
         User user = userDAO.findByUsername(username);
-        System.out.println(user);
 
         if (user != null) {
             if (user.getPasswordHash().equals(password)) {
@@ -41,10 +40,8 @@ public class AuthService {
                     message = "Login successful";
 
 
-                    token = UUID.randomUUID().toString();
-
-
-                    activeSessions.put(token, user.getUserID());
+                    token = SessionManager.createSession(user.getUserID());
+                    System.out.println("Authservise session token"+token);
 
                 } else {
                     message = "Login failed - Incorrect role";
@@ -71,19 +68,16 @@ public class AuthService {
         return result;
     }
 
-    public Integer getUserIdFromToken(String token) {
-        return activeSessions.get(token);
-    }
 
     public void logout(String token) {
-        activeSessions.remove(token);
+        SessionManager.invalidateSession(token);
     }
 
     private void saveLoginActivity(User user, boolean success, String message) {
         UserActivityLog log = new UserActivityLog();
         log.setUserID(user.getUserID());
         log.setActionType("Login");
-        log.setActionTarget("AuthenticationService");
+        log.setActionTarget("AuthService");
         log.setTargetReferenceID(0);
         log.setActionDetails(message);
         log.setActionTimestamp(LocalDateTime.now());
