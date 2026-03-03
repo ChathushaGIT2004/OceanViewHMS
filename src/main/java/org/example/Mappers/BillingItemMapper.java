@@ -16,18 +16,24 @@ public class BillingItemMapper {
 
         BillingItem item = new BillingItem();
 
-        item.setItemID(rs.getInt("ItemID"));
+        int billingItemID = rs.getInt("ItemID");
+        int refID = rs.getInt("ItemRefID");
+        String itemType = rs.getString("ItemType");
 
+
+        item.setItemID(refID); // this is the REAL object ID
+        item.setItemType(itemType);
         item.setQuantity(rs.getInt("Quantity"));
         item.setPrice(rs.getDouble("Price"));
 
+        // Now resolve correctly
+        BillableItem realItem =
+               (BillableItem) BillableResolver.resolve(itemType, refID);
 
-        BillableItem realItem = (BillableItem) BillableResolver.resolve(item.getItemType(), rs.getInt("ItemID"));
         item.setItem(realItem);
 
         return item;
     }
-
     // Map a list of BillingItems
     public static List<BillingItem> mapList(ResultSet rs) throws SQLException {
         List<BillingItem> list = new ArrayList<>();

@@ -1,14 +1,22 @@
 package org.example.dao;
 
+import org.example.DTO.ResponseMessageDTO;
 import org.example.Models.Billings.Billing;
 import java.util.List;
 
 
 public interface BillingDAO {
     Billing findById(int billID);
-    List<Billing> findByReservationId(int reservationID);
+
+
+    List<Billing> findByGuestId(int guestID);
+
     List<Billing> findAll();
-    void save(Billing billing);
+    ResponseMessageDTO save(Billing billing);
     void update(Billing billing);
+
+    // 💳 Pay Billing
+    ResponseMessageDTO pay(int billID, double amount, String paymentMethod);
+
     void delete(int billID);
 }
