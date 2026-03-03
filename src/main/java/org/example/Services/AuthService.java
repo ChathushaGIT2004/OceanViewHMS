@@ -70,6 +70,7 @@ public class AuthService {
 
 
     public void logout(String token) {
+         UserActivityLogService.getInstance().log(token,"LOGOUT","AuthService",0,"LOgout Successfully");
         SessionManager.invalidateSession(token);
     }
 

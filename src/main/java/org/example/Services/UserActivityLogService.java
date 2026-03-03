@@ -51,10 +51,13 @@ public class UserActivityLogService {
                     int targetRefID,
                     String details) {
 
+        System.out.println("UserActivity Log method  Accessed");
+
         try {
-            if (!SessionManager.isValidToken(token)) return;
+            if (!SessionManager.isValidToken(token)) System.out.println("INvalid TOken is here");
 
             int userID = SessionManager.getUserId(token);
+            System.out.println("USer Activity log ID Fount"+userID);
 
             UserActivityLog log = new UserActivityLog();
             log.setUserID(userID);
