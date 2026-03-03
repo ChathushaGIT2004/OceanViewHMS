@@ -1,7 +1,7 @@
 package org.example.Mappers;
 
 import org.example.Models.Guest;
-import org.example.Models.Reservation;
+import org.example.Models.Billings.BillableItems.Reservation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,11 +38,11 @@ public class ReservationMapper {
 
 
         if (rs.getDate("CheckInDate") != null) {
-            res.setCheckInDate(rs.getTimestamp("CheckInDate"));
+            res.setCheckInDate(rs.getDate("CheckInDate"));
         }
 
         if (rs.getDate("CheckOutDate") != null) {
-            res.setCheckOutDate(rs.getTimestamp ("CheckOutDate"));
+            res.setCheckOutDate(rs.getDate ("CheckOutDate"));
         }
 
 

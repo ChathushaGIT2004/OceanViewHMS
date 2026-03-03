@@ -1,9 +1,11 @@
 package org.example.dao.impl;
 
+import org.example.DTO.ResponseMessageDTO;
+import org.example.Util.DBConnection;
 import org.example.dao.ReservationDAO;
 import org.example.Mappers.ReservationMapper;
 import org.example.Mappers.RoomAllocationMapper;
-import org.example.Models.Reservation;
+import org.example.Models.Billings.BillableItems.Reservation;
 import org.example.Models.Room.RoomAllocation;
 
 import java.sql.*;
@@ -12,10 +14,14 @@ import java.util.List;
 
 public class ReservationDAOImpl implements ReservationDAO {
 
-    private final Connection conn;
+    private   Connection conn;
 
-    public ReservationDAOImpl(Connection conn) {
-        this.conn = conn;
+    public ReservationDAOImpl() {
+        try {
+            this.conn = DBConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // ==============================
@@ -23,7 +29,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     // ==============================
     @Override
     public Reservation getById(int reservationID) {
-        String sql = "SELECT * FROM Reservations WHERE ReservationID=?";
+        String sql = "SELECT * FROM Reservations AS r JOIN guests AS g ON g.GuestID=r.GuestID  WHERE ReservationID=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reservationID);
             ResultSet rs = ps.executeQuery();
@@ -65,7 +71,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public List<Reservation> getAll() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM Reservations ORDER BY ReservationDate DESC";
+        String sql = "SELECT * FROM Reservations AS r JOIN guests as g ON g.GuestID=r.GuestID ORDER BY ReservationDate DESC;";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -128,43 +134,84 @@ public class ReservationDAOImpl implements ReservationDAO {
     // Save reservation with allocations
     // ==============================
     @Override
-    public void save(Reservation reservation) {
-        String sql = "INSERT INTO Reservations (GuestID, ReservationDate, TotalAmount, Status) VALUES (?, ?, ?, ?)";
+    public ResponseMessageDTO save(Reservation reservation) {
+
+        ResponseMessageDTO responseMessageDTO=new ResponseMessageDTO();
+        System.out.println("Reservatin DaO method Accessed");
+        String sql = "INSERT INTO Reservations (GuestID,   CheckInDate,CheckOutDate,NumberOfGuests,TotalAmount, Status) VALUES (?,?,?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, reservation.getGuest().getGuestID());
-            ps.setTimestamp(2, Timestamp.valueOf(reservation.getReservationDate()));
-            ps.setDouble(3, reservation.getTotalAmount());
-            ps.setString(4, reservation.getStatus());
+            ps.setDate(2,  reservation.getCheckInDate());
+            ps.setDate(3,reservation.getCheckOutDate());
+            ps.setInt(4,reservation.getNumberOfGuests());
+            ps.setDouble(5, reservation.getTotalAmount());
+            ps.setString(6, reservation.getStatus());
             ps.executeUpdate();
 
             // Get generated ReservationID
             ResultSet keys = ps.getGeneratedKeys();
+            System.out.println("keys:" +keys);
             if (keys.next()) {
+
                 int reservationID = keys.getInt(1);
-                saveAllocations(reservationID, reservation.getRoomAllocationList());
+                responseMessageDTO.setSuccess(true);
+                responseMessageDTO.setMessage("reservation ID Obtained");
+                responseMessageDTO.setData(reservationID);
+
+
+
+
+                return responseMessageDTO;
+
+            }
+            else{
+                responseMessageDTO.setSuccess(false);
+                responseMessageDTO.setMessage("Database Insertion Failed");
+                System.out.println("Database Adding Failed");
             }
         } catch (SQLException e) {
+            responseMessageDTO.setSuccess(false);
+            responseMessageDTO.setMessage(e.getMessage());
             e.printStackTrace();
         }
+        return responseMessageDTO;
     }
 
     // ==============================
     // Update reservation
     // ==============================
     @Override
-    public void update(Reservation reservation) {
+    public ResponseMessageDTO update(Reservation reservation) {
+        ResponseMessageDTO response = new ResponseMessageDTO();
+        System.out.println("Reservation Update Method Accessed");
+
         String sql = "UPDATE Reservations SET GuestID=?, TotalAmount=?, Status=? WHERE ReservationID=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reservation.getGuest().getGuestID());
             ps.setDouble(2, reservation.getTotalAmount());
             ps.setString(3, reservation.getStatus());
             ps.setInt(4, reservation.getReservationID());
-            ps.executeUpdate();
+
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected > 0) {
+                response.setSuccess(true);
+                response.setMessage("Reservation updated successfully. Rows affected: " + rowsAffected);
+                System.out.println("Update executed. Total is " + reservation.getTotalAmount());
+            } else {
+                response.setSuccess(false);
+                response.setMessage("No reservation updated. Check ReservationID: " + reservation.getReservationID());
+                System.out.println("Update skipped. No matching reservation found.");
+            }
+
         } catch (SQLException e) {
+            response.setSuccess(false);
+            response.setMessage(e.getMessage());
             e.printStackTrace();
         }
-    }
 
+        return response;
+    }
     // ==============================
     // Delete reservation
     // ==============================
@@ -200,13 +247,11 @@ public class ReservationDAOImpl implements ReservationDAO {
     private void saveAllocations(int reservationID, List<RoomAllocation> allocations) {
         if (allocations == null || allocations.isEmpty()) return;
 
-        String sql = "INSERT INTO RoomAllocation (ReservationID, RoomID, CheckInDate, CheckOutDate, AllocationStatus) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO RoomAllocation (ReservationID, RoomID,   AllocationStatus) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             for (RoomAllocation alloc : allocations) {
                 ps.setInt(1, reservationID);
                 ps.setInt(2, alloc.getRoom().getRoomID());
-                ps.setDate(3, Date.valueOf(alloc.getCheckInDate()));
-                ps.setDate(4, Date.valueOf(alloc.getCheckOutDate()));
                 ps.setString(5, alloc.getAllocationStatus());
                 ps.addBatch();
             }

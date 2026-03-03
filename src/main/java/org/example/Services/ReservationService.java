@@ -1,0 +1,262 @@
+package org.example.Services;
+
+import org.example.DTO.AddReservationRequestDTO;
+import org.example.DTO.ReservationDTO;
+import org.example.DTO.ResponseMessageDTO;
+import org.example.DTO.UpdateStatusDTO;
+import org.example.Models.Billings.BillableItems.Reservation;
+import org.example.Models.Guest;
+import org.example.Models.Room.Room;
+import org.example.Models.Room.RoomAllocation;
+import org.example.Models.Room.RoomType;
+import org.example.Models.Session;
+import org.example.Models.User.UserActivityLog;
+import org.example.Util.SessionManager;
+import org.example.dao.ReservationDAO;
+import org.example.dao.RoomTypeDAO;
+import org.example.dao.impl.ReservationDAOImpl;
+import org.example.dao.impl.RoomTypeDAOImpl;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ReservationService {
+
+    private final ReservationDAO reservationDAO;
+    private final RoomTypeDAO roomTypeDAO;
+    private final RoomAllocationService allocationService;
+    private final RoomService roomService;
+
+    public ReservationService() {
+        try {
+            Connection conn = org.example.Util.DBConnection.getInstance().getConnection();
+
+            this.reservationDAO = new ReservationDAOImpl();
+            this.roomTypeDAO = new RoomTypeDAOImpl();
+            this.allocationService = new RoomAllocationService();
+            this.roomService = new RoomService();
+
+        } catch (Exception e) {
+            throw new RuntimeException("DB Connection Failed", e);
+        }
+    }
+
+    
+    //  ADD RESERVATION + ROOM ALLOCATION
+
+    public ResponseMessageDTO addReservation(AddReservationRequestDTO dto) {
+
+        // Validate token first
+        if (!SessionManager.isValidToken(dto.getToken())) {
+            return ResponseMessageDTO.invalidToken();
+        }
+
+        // Fetch guest
+        Guest guest = new GuestService().findGuestByID(dto.getGuestID());
+
+        if (guest == null) {
+            ResponseMessageDTO response = new ResponseMessageDTO();
+            response.setSuccess(false);
+            response.setMessage("Guest not found");
+            return response;
+        }
+
+        // Map DTO -> Reservation
+        Reservation reservation = new Reservation();
+        reservation.setGuest(guest);
+        reservation.setCheckInDate(new java.sql.Date(dto.getCheckIn().getTime()));
+        reservation.setCheckOutDate(new java.sql.Date(dto.getCheckOut().getTime()));
+        reservation.setNumberOfGuests(dto.getNumberOfGuests());
+        reservation.setStatus(dto.getStatus());
+
+        double totalAmount = 0;
+
+        // Save reservation to DB
+        ResponseMessageDTO response = reservationDAO.save(reservation);
+        int reservationId = (Integer) response.getData();
+        reservation.setReservationID(reservationId);
+
+        List<RoomAllocation> allocations = new ArrayList<>();
+
+        // Allocate rooms
+        for (Integer roomId : dto.getRoomIds()) {
+            Room room = roomService.getRoomById(roomId);
+            if (room == null) continue;
+
+            RoomType type = roomTypeDAO.findById(room.getRoomType());
+            double roomCharge = reservation.getNumberofNights() * type.getChargePerNight();
+            totalAmount += roomCharge;
+
+            RoomAllocation allocation = new RoomAllocation();
+            allocation.setReservationId(reservationId);
+            allocation.setRoom(room);
+            allocation.setAllocationStatus("RESERVED");
+
+            allocationService.addRoomToReservation(reservationId,allocation.getRoom().getRoomID());
+
+            room.setRoomStatus("RESERVED");
+            roomService.updateRoom(room);
+
+            allocations.add(allocation);
+        }
+
+        reservation.setTotalAmount(totalAmount);
+        reservation.setRoomAllocationList(allocations);
+        reservationDAO.update(reservation);
+
+        // Log activity
+        UserActivityLogService.getInstance()
+                .log(dto.getToken(), "CREATE", "RESERVATION", reservationId, "Reservation Added Successfully");
+
+        return response;
+    }
+    
+    //  GET ALL RESERVATIONS 
+    
+    public List<ReservationDTO> getAllReservations(String token) {
+
+        List<Reservation> reservations = reservationDAO.getAll();
+        List<ReservationDTO> dtoList = new ArrayList<>();
+
+        for (Reservation res : reservations) {
+
+            ReservationDTO dto = new ReservationDTO();
+
+            dto.setReservationID(res.getReservationID());
+            dto.setGuestID(res.getGuest().getGuestID());
+            dto.setGuestFullname(res.getGuest().getFullName());
+            dto.setStatus(res.getStatus());
+            dto.setTotalAmount(res.getTotalAmount());
+            dto.setCheckIn(res.getCheckInDate());
+            dto.setCheckOut(res.getCheckOutDate());
+            dto.setNumberOFGuests(res.getNumberOfGuests());
+
+            List<RoomAllocation> allocations =
+                    allocationService.getByReservationId(res.getReservationID());
+
+            List<Integer> roomIds = new ArrayList<>();
+            for (RoomAllocation alloc : allocations)
+                roomIds.add(alloc.getRoom().getRoomID());
+
+            dto.setRoomIds(roomIds);
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
+
+    
+    //  GET RESERVATION BY ID
+    
+    public Reservation getReservationById(int reservationID) {
+        return reservationDAO.getById(reservationID);
+    }
+
+    
+    //  GET RESERVATIONS BY GUEST
+    
+    public List<Reservation> getReservationsByGuest(int guestID) {
+        return reservationDAO.getByGuestId(guestID);
+    }
+
+    
+   // UPDATE RESERVATION
+    
+    public ResponseMessageDTO updateReservationDetails(String token, Reservation reservation) {
+        if (!SessionManager.isValidToken(token)) {
+            return ResponseMessageDTO.invalidToken();
+        }
+
+         
+        Reservation existing = reservationDAO.getById(reservation.getReservationID());
+
+        if (existing == null) {
+            return failureResponse("Reservation not found");
+        }
+
+        
+        existing.setGuest(reservation.getGuest());
+        existing.setStatus(reservation.getStatus());
+        existing.setTotalAmount(reservation.getTotalAmount());
+
+        UserActivityLogService.getInstance().log(token,"UPDATE","RESERVATION", reservation.getId(),"Reservation Status Updated Successfully ");
+        return reservationDAO.update(existing);
+    }
+
+     
+    //  UPDATE STATUS ONLY
+    public ResponseMessageDTO updateReservationStatus(UpdateStatusDTO dto) {
+
+        if (!SessionManager.isValidToken(dto.getToken())) {
+            return ResponseMessageDTO.invalidToken();
+        }
+
+        // Fetch the existing reservation
+        Reservation existing = reservationDAO.getById(dto.getID());
+        if (existing == null) {
+            ResponseMessageDTO response = new ResponseMessageDTO();
+            response.setSuccess(false);
+            response.setMessage("Reservation not found");
+            return response;
+        }
+
+        // Update only the status
+        existing.setStatus(dto.getStatus());
+
+        // Update in database
+        ResponseMessageDTO result = reservationDAO.update(existing);
+
+        // Log activity
+        UserActivityLogService.getInstance()
+                .log(dto.getToken(), "UPDATE", "RESERVATION", dto.getID(), "Reservation status updated to " + dto.getStatus());
+
+        return result;
+    }
+    
+    //  DELETE RESERVATION + FREE ROOMS
+    
+    public boolean deleteReservation(String token, int reservationID) {
+
+        List<RoomAllocation> allocations =
+                allocationService.getByReservationId(reservationID);
+
+        for (RoomAllocation alloc : allocations) {
+
+            Room room = alloc.getRoom();
+            room.setRoomStatus("AVAILABLE");
+            roomService.updateRoom(room);
+
+            allocationService.removeRoomFromReservation(alloc.getAllocationID(),false);
+        }
+
+        reservationDAO.delete(reservationID);
+        return true;
+    }
+
+    public double calculateReservationTotal(int reservationId) {
+        Reservation reservation = reservationDAO.getById(reservationId);
+        if (reservation == null) return 0;
+
+        double total = 0;
+        List<RoomAllocation> allocations = allocationService.getByReservationId(reservationId);
+
+        for (RoomAllocation alloc : allocations) {
+            Room room = alloc.getRoom();
+            RoomType type = roomTypeDAO.findById(room.getRoomType());
+            total += reservation.getNumberofNights() * type.getChargePerNight();
+        }
+
+        reservation.setTotalAmount(total);
+        reservationDAO.update(reservation);
+
+        return total;
+    }
+
+    private ResponseMessageDTO failureResponse(String message) {
+        ResponseMessageDTO dto = new ResponseMessageDTO();
+        dto.setSuccess(false);
+        dto.setMessage(message);
+        return dto;
+    }
+}

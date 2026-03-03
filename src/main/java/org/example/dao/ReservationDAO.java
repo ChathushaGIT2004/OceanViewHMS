@@ -1,6 +1,7 @@
 package org.example.dao;
 
-import org.example.Models.Reservation;
+import org.example.DTO.ResponseMessageDTO;
+import org.example.Models.Billings.BillableItems.Reservation;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -18,9 +19,9 @@ public interface ReservationDAO {
 
     List<Reservation> getByTimeFrame(Timestamp from, Timestamp to, int limit);
 
-    void save(Reservation reservation);
+    ResponseMessageDTO save(Reservation reservation);
 
-    void update(Reservation reservation);
+    ResponseMessageDTO update(Reservation reservation);
 
     void delete(int reservationID);
 }

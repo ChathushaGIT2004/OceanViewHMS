@@ -1,5 +1,6 @@
 package org.example.dao.impl;
 
+import org.example.Util.DBConnection;
 import org.example.dao.RoomAllocationDAO;
 import org.example.Mappers.RoomAllocationMapper;
 import org.example.Models.Room.RoomAllocation;
@@ -10,10 +11,14 @@ import java.util.List;
 
 public class RoomAllocationDAOImpl implements RoomAllocationDAO {
 
-    private final Connection conn;
+    private  Connection conn=null;
 
-    public RoomAllocationDAOImpl(Connection conn) {
-        this.conn = conn;
+    public RoomAllocationDAOImpl( ) {
+        try {
+            this.conn = DBConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // ==============================
@@ -32,6 +37,8 @@ public class RoomAllocationDAOImpl implements RoomAllocationDAO {
             e.printStackTrace();
         }
         return null;
+
+
     }
 
     // ==============================
@@ -78,15 +85,13 @@ public class RoomAllocationDAOImpl implements RoomAllocationDAO {
     public void save(RoomAllocation allocation) {
         String sql = """
                 INSERT INTO RoomAllocation
-                (ReservationID, RoomID, CheckInDate, CheckOutDate, AllocationStatus)
-                VALUES (?, ?, ?, ?, ?)
+                (ReservationID, RoomID,  AllocationStatus)
+                VALUES (?, ?, ?)
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, allocation.getReservationId());
             ps.setInt(2, allocation.getRoom().getRoomID());
-            ps.setDate(3, Date.valueOf(allocation.getCheckInDate()));
-            ps.setDate(4, Date.valueOf(allocation.getCheckOutDate()));
-            ps.setString(5, allocation.getAllocationStatus());
+            ps.setString(3, allocation.getAllocationStatus());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -100,15 +105,13 @@ public class RoomAllocationDAOImpl implements RoomAllocationDAO {
     public void update(RoomAllocation allocation) {
         String sql = """
                 UPDATE RoomAllocation
-                SET RoomID=?, CheckInDate=?, CheckOutDate=?, AllocationStatus=?
+                SET RoomID=?,  AllocationStatus=?
                 WHERE AllocationID=?
                 """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, allocation.getRoom().getRoomID());
-            ps.setDate(2, Date.valueOf(allocation.getCheckInDate()));
-            ps.setDate(3, Date.valueOf(allocation.getCheckOutDate()));
-            ps.setString(4, allocation.getAllocationStatus());
-            ps.setInt(5, allocation.getAllocationID());
+            ps.setString(2, allocation.getAllocationStatus());
+            ps.setInt(3, allocation.getAllocationID());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
