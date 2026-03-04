@@ -1,5 +1,6 @@
 package org.example.Services;
 
+import org.example.DTO.ResponseMessageDTO;
 import org.example.Models.Room.Room;
 import org.example.Models.Room.RoomAllocation;
 import org.example.dao.RoomAllocationDAO;
@@ -45,7 +46,9 @@ public class RoomAllocationService {
 
     
 
-    public RoomAllocation addRoomToReservation(int reservationId, int roomId) {
+    public ResponseMessageDTO addRoomToReservation(int reservationId, int roomId) {
+
+        ResponseMessageDTO response=new ResponseMessageDTO();
            Room room= roomService.getRoomById(roomId);
         if (room == null || !"AVAILABLE".equals(room.getRoomStatus())) {
             throw new IllegalArgumentException("Room is not available");
@@ -56,27 +59,36 @@ public class RoomAllocationService {
         allocation.setRoom(room);
         allocation.setAllocationStatus("RESERVED");
 
+        System.out.println("Allocation Started"+allocation.getAllocationID());
         allocationDAO.save(allocation);
+
 
         // Update room status
         room.setRoomStatus("RESERVED");
-          roomService.updateRoom(room);
+          roomService.updateRoomStatus(room);
 
           reservationService =new ReservationService();
-          reservationService.calculateReservationTotal(reservationId);
+          double value= reservationService.calculateReservationTotal(reservationId);
 
-        return allocation;
+          System.out.println("Allocation value"+value);
+          response.setSuccess(true);
+          response.setMessage("Added ");
+        return  response;
     }
 
     public boolean removeRoomFromReservation(int allocationId,Boolean calculate) {
+       System.out.println("allocation ID is :"+allocationId);
         RoomAllocation allocation = allocationDAO.getdById(allocationId);
+
+        System.out.println("Allocation fount at service:"+allocation.getAllocationID());
         if (allocation == null) return false;
         int reservationID= allocation.getReservationId();
 
         Room room = allocation.getRoom();
         if (room != null) {
+            System.out.println("Room found room id "+room.getRoomID());
             room.setRoomStatus("AVAILABLE");
-           roomService.updateRoom(room);
+           roomService.updateRoomStatus(room);
         }
 
         allocationDAO.delete(allocationId);
