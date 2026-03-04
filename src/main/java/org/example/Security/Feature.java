@@ -20,6 +20,8 @@ public enum Feature {
     DELETE_ROOM,
     VIEW_ROOMS,
 
+    CREATE_ROOM_TYPE,
+
     // Reservation Management (Optional)
     CREATE_RESERVATION,
     UPDATE_RESERVATION,
@@ -27,5 +29,11 @@ public enum Feature {
     VIEW_RESERVATIONS,
 
     // Activity Logs
-    VIEW_ACTIVITY_LOGS     // For admin/manager to view user activities
+    VIEW_ACTIVITY_LOGS ,    // For admin/manager to view user activities
+
+
+    ACCESS_USERSPAGE,
+    ACCESS_ROOMPAGE,
+    ACCESS_RESERVATIONPAGE,
+    ACCESS_GUEST_PAGE
 }

@@ -22,12 +22,18 @@ public class RoleFeatureManager {
                 Feature.CREATE_ROOM,
                 Feature.UPDATE_ROOM,
                 Feature.DELETE_ROOM,
+                Feature.CREATE_ROOM_TYPE,
                 Feature.VIEW_ROOMS,
                 Feature.CREATE_RESERVATION,
                 Feature.UPDATE_RESERVATION,
                 Feature.DELETE_RESERVATION,
                 Feature.VIEW_RESERVATIONS,
-                Feature.VIEW_ACTIVITY_LOGS
+                Feature.VIEW_ACTIVITY_LOGS,
+
+                Feature.ACCESS_USERSPAGE,
+                Feature.ACCESS_ROOMPAGE,
+                Feature.ACCESS_RESERVATIONPAGE,
+                Feature.ACCESS_GUEST_PAGE
         ));
 
         // RECEPTIONIST permissions: Limited access
