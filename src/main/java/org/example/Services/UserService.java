@@ -1,5 +1,6 @@
 package org.example.Services;
  
+import org.example.DTO.ResponseMessageDTO;
 import org.example.DTO.UserDTO;
 import org.example.Models.User.User;
 import org.example.Util.SessionManager;
@@ -49,18 +50,26 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    
-    public void createUser(UserDTO dto, String password) {
+    public ResponseMessageDTO createUser(UserDTO dto) {
 
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setFullName(dto.getFullName());
-        user.setRole(dto.getRole());
-        user.setEmail(dto.getEmail());
-        user.setStatus(dto.getStatus());
-        user.setPasswordHash(hashPassword(password));
+        try {
+            User user = new User();
+            user.setUsername(dto.getUsername());
+            user.setFullName(dto.getFullName());
+            user.setRole(dto.getRole());
+            user.setEmail(dto.getEmail());
+            user.setStatus(dto.getStatus());
 
-        userDAO.save(user);
+            // Save user
+            userDAO.save(user);
+
+            // Return success message
+            return new ResponseMessageDTO(true, "User created successfully");
+
+        } catch (Exception e) {
+            // Return error message in DTO
+            return new ResponseMessageDTO(false, "Failed to create user: " + e.getMessage());
+        }
     }
 
     

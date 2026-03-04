@@ -5,8 +5,10 @@ import com.google.gson.Gson;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
-        import org.example.DTO.UserDTO;
+import org.example.DTO.ResponseMessageDTO;
+import org.example.DTO.UserDTO;
 import org.example.Services.UserService;
+import org.example.Util.SessionManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -85,20 +87,20 @@ public class UserController extends HttpServlet {
 
         resp.setContentType("application/json");
 
-        UserDTO dto = gson.fromJson(req.getReader(), UserDTO.class);
-        String password = req.getParameter("password");
 
-        if (password == null || password.isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("Password required");
+        String token = req.getHeader("Authorization");
+        if (!SessionManager.isValidToken(token)) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resp.getWriter().write(gson.toJson(ResponseMessageDTO.invalidToken()));
             return;
         }
 
-        userService.createUser(dto, password);
+        UserDTO dto = gson.fromJson(req.getReader(), UserDTO.class);
 
-        resp.getWriter().write("{\"message\":\"User Created\"}");
+        ResponseMessageDTO responseDTO = userService.createUser(dto);
+
+        resp.getWriter().write(gson.toJson(responseDTO));
     }
-
     // =============================
     // UPDATE USER
     // =============================
