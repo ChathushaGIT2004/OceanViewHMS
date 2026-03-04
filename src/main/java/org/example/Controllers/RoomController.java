@@ -1,5 +1,7 @@
 package org.example.Controllers;
 
+import org.example.Security.Feature;
+import org.example.Security.RoleFeatureManager;
 import org.example.Services.RoomService;
 
 
@@ -10,7 +12,9 @@ import org.example.Services.RoomService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-        import java.io.IOException;
+import org.example.Util.SessionManager;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
@@ -123,13 +127,13 @@ public class RoomController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Example: adding a new room
-        int roomID = Integer.parseInt(request.getParameter("roomID"));
+
+        if (!authorize(request, response, Feature.CREATE_ROOM)) return; // new feature for rooms
+
         int roomType = Integer.parseInt(request.getParameter("roomType"));
         String roomStatus = request.getParameter("roomStatus");
 
         Room room = new Room();
-        room.setRoomID(roomID);
         room.setRoomType(roomType);
         room.setRoomStatus(roomStatus);
 
@@ -140,17 +144,17 @@ public class RoomController extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Update room status or type
+
+        if (!authorize(request, response, Feature.UPDATE_ROOM)) return;
+
         int roomID = Integer.parseInt(request.getParameter("roomID"));
         String roomStatus = request.getParameter("roomStatus");
-        int roomType = Integer.parseInt(request.getParameter("roomType"));
 
         Room room = roomService.getRoomById(roomID);
         if (room != null) {
-            room.setRoomStatus(roomStatus);
-            room.setRoomType(roomType);
+            room.setRoomStatus(roomStatus); // e.g., "Available" / "Occupied"
             roomService.updateRoom(room);
-            response.getWriter().println("{\"message\":\"Room updated successfully\"}");
+            response.getWriter().println("{\"message\":\"Room status updated successfully\"}");
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("{\"error\":\"Room not found\"}");
@@ -160,8 +164,29 @@ public class RoomController extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!authorize(request, response, Feature.DELETE_ROOM)) return;
+
         int roomID = Integer.parseInt(request.getParameter("roomID"));
         roomService.deleteRoom(roomID);
         response.getWriter().println("{\"message\":\"Room deleted successfully\"}");
+    }
+
+    private boolean authorize(HttpServletRequest request, HttpServletResponse response, Feature feature) throws IOException {
+        String token = request.getHeader("Authorization");
+
+        if (!SessionManager.isValidToken(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\":\"Invalid session\"}");
+            return false;
+        }
+
+        String role = SessionManager.getRole(token);
+        if (!RoleFeatureManager.hasFeature(role, feature)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("{\"error\":\"Access denied. Feature not allowed for your role\"}");
+            return false;
+        }
+        return true;
     }
 }
