@@ -4,6 +4,7 @@ const sidebarPages = [
     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOMPAGE" },
     { href: "Reservation.html", icon: "fa-calendar-check", title: "Reservations", feature: "ACCESS_RESERVATIONPAGE" },
     { href: "Users.html", icon: "fa-users", title: "Users", feature: "ACCESS_USERSPAGE" },
+    { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: "ACCESS_PROFILE_PAGE" }
 ];
 
 const Prefix = "<a href='Dashboard.html' class='sidebar-nav-item'><i class='fas fa-home'></i><span>Dashboard</span></a>";

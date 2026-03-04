@@ -33,7 +33,8 @@ public class RoleFeatureManager {
                 Feature.ACCESS_USERSPAGE,
                 Feature.ACCESS_ROOMPAGE,
                 Feature.ACCESS_RESERVATIONPAGE,
-                Feature.ACCESS_GUEST_PAGE
+                Feature.ACCESS_GUEST_PAGE,
+                Feature.ACCESS_PROFILE_PAGE
         ));
 
         // RECEPTIONIST permissions: Limited access

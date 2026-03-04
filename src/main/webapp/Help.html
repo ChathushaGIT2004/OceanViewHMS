@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Help Section - Ocean View Reservation System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f7fb; }
+        h1 { color: #333; }
+        .category { margin-top: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .help-item { margin: 10px 0; padding: 10px; background: #fff; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .help-item h3 { margin: 0 0 5px 0; color: #0077cc; }
+        .help-item p { margin: 0; }
+        .help-item small { display: block; margin-top: 5px; color: #666; }
+        button { margin-top: 10px; padding: 8px 15px; background: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005fa3; }
+    </style>
+</head>
+<body>
+
+<h1>Help Section</h1>
+<button onclick="loadHelp()">Load All Help</button>
+<div id="helpContainer"></div>
+
+<script>
+    async function loadHelp() {
+        const container = document.getElementById('helpContainer');
+        container.innerHTML = "<p>Loading help content...</p>";
+
+        try {
+            // Fetch from the controller endpoint
+            const response = await fetch('/api/help');
+            if (!response.ok) throw new Error("Failed to fetch help content");
+
+            const helpItems = await response.json();
+            container.innerHTML = ""; // Clear loading message
+
+            // Group by category
+            const categories = [...new Set(helpItems.map(item => item.category))];
+
+            categories.forEach(category => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'category';
+                catDiv.innerHTML = `<h2>${category}</h2>`;
+
+                helpItems
+                    .filter(item => item.category === category)
+                    .forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'help-item';
+                        itemDiv.innerHTML = `
+                        <h3>${item.title}</h3>
+                        <p>${item.description}</p>
+                        <small>${item.more}</small>
+                    `;
+                        catDiv.appendChild(itemDiv);
+                    });
+
+                container.appendChild(catDiv);
+            });
+
+        } catch (error) {
+            container.innerHTML = "<p style='color:red;'>Failed to load help content.</p>";
+            console.error(error);
+        }
+    }
+
+</script>
+</body>
+</html>

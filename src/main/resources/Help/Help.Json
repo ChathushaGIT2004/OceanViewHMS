@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "category": "Authentication",
+    "title": "Login",
+    "description": "Enter your username and password provided by admin to access the system.",
+    "more": "If you forget your password, contact the system administrator to reset it."
+  },
+  {
+    "id": 2,
+    "category": "Reservation",
+    "title": "Add Reservation",
+    "description": "Go to 'Add Reservation' and fill in guest details.",
+    "more": "Ensure the room type is available before saving."
+  },
+  {
+    "id": 3,
+    "category": "Reservation",
+    "title": "Display Reservation",
+    "description": "Enter reservation number to view full details of a booking.",
+    "more": "You can also search by guest name if reservation number is unknown."
+  }
+]
