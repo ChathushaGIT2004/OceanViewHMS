@@ -5,8 +5,9 @@ import org.example.dao.UserActivityLogDAO;
 import org.example.dao.impl.UserActivityLogDAOImpl;
 import org.example.Util.SessionManager;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 public class UserActivityLogService {
 
@@ -39,7 +40,7 @@ public class UserActivityLogService {
         int userID = SessionManager.getUserId(token);
 
         log.setUserID(userID);
-        log.setActionTimestamp(LocalDateTime.now());
+        log.setActionTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
         logDAO.save(log);
     }
@@ -54,7 +55,7 @@ public class UserActivityLogService {
         System.out.println("UserActivity Log method  Accessed");
 
         try {
-            if (!SessionManager.isValidToken(token)) System.out.println("INvalid TOken is here");
+
 
             int userID = SessionManager.getUserId(token);
             System.out.println("USer Activity log ID Fount"+userID);
@@ -65,7 +66,7 @@ public class UserActivityLogService {
             log.setActionTarget(actionTarget);
             log.setTargetReferenceID(targetRefID);
             log.setActionDetails(details);
-            log.setActionTimestamp(LocalDateTime.now());
+            log.setActionTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
             logDAO.save(log);
 

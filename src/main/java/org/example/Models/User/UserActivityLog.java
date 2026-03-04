@@ -1,5 +1,6 @@
 package org.example.Models.User;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class UserActivityLog {
@@ -9,7 +10,7 @@ public class UserActivityLog {
     private String actionTarget;      // Guest, Reservation, Booking, Room, Billing
     private int targetReferenceID;
     private String actionDetails;
-    private LocalDateTime actionTimestamp;
+    private Timestamp actionTimestamp;
 
     public int getActivityID() {
         return activityID;
@@ -59,11 +60,11 @@ public class UserActivityLog {
         this.actionDetails = actionDetails;
     }
 
-    public LocalDateTime getActionTimestamp() {
+    public Timestamp getActionTimestamp() {
         return actionTimestamp;
     }
 
-    public void setActionTimestamp(LocalDateTime actionTimestamp) {
+    public void setActionTimestamp(Timestamp actionTimestamp) {
         this.actionTimestamp = actionTimestamp;
     }
 }

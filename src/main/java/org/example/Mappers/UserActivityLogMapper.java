@@ -21,10 +21,8 @@ public class UserActivityLogMapper {
         log.setActionDetails(rs.getString("ActionDetails"));
 
 
-        java.sql.Timestamp timestamp = rs.getTimestamp("ActionTimestamp");
-        if (timestamp != null) {
-            log.setActionTimestamp(timestamp.toLocalDateTime());
-        }
+        log.setActionTimestamp(rs.getTimestamp("ActionTimestamp"));
+
 
         return log;
     }
