@@ -59,7 +59,7 @@ public class RoomAllocationController extends HttpServlet {
         RoomAllocationRequest req = gson.fromJson(request.getReader(), RoomAllocationRequest.class);
 
         try {
-            RoomAllocation allocation = allocationService.addRoomToReservation(req.getReservationId(), req.getRoomId());
+            ResponseMessageDTO allocation = allocationService.addRoomToReservation(req.getReservationId(), req.getRoomId());
             out.print(gson.toJson(allocation));
         } catch (IllegalArgumentException e) {
             out.print(gson.toJson(new ResponseMessageDTO(false, e.getMessage())));
@@ -77,6 +77,7 @@ public class RoomAllocationController extends HttpServlet {
         String path = request.getPathInfo(); // e.g., /123
         try {
             int allocationId = Integer.parseInt(path.substring(1));
+            System.out.println("Allocation ID On COntroller"+ allocationId);
             boolean success = allocationService.removeRoomFromReservation(allocationId,true);
             if (success) {
                 out.print(gson.toJson(new ResponseMessageDTO(true, "Room allocation removed successfully")));
