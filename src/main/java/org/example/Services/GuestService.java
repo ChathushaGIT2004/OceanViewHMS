@@ -1,16 +1,22 @@
 package org.example.Services;
 
+import org.example.DTO.GuestDTO;
 import org.example.Models.Guest;
+import org.example.Models.User.UserActivityLog;
 import org.example.dao.GuestDAO;
+import org.example.dao.UserActivityLogDAO;
 import org.example.dao.impl.GuestDAOImpl;
 import org.example.Util.SessionManager;
 import org.example.Models.Session;
+import org.example.dao.impl.UserActivityLogDAOImpl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class GuestService {
 
-    private GuestDAO guestDAO;
+    private final GuestDAO guestDAO;
+    private  UserActivityLogService userActivityLogService;
 
     public GuestService() {
         this.guestDAO = new GuestDAOImpl();
@@ -19,32 +25,57 @@ public class GuestService {
 
      // Find guest by NIC
 
-    public Guest findGuestByNIC(String token, String nic) {
-        if (!isSessionActive(token)) return null;
+    public Guest findGuestByNIC( String nic) {
         return guestDAO.findByNIC(nic);
     }
 
 
-     // Add a new guest if not exists, otherwise return existing
+    // Find guest by NIC
 
-    public Guest addGuest(String token, String fullName, String nic, String contactNumber, String email) {
-        if (!isSessionActive(token)) return null;
+    public Guest findGuestByID( int id) {
+        return guestDAO.findById(id);
+    }
 
-        Guest existing = guestDAO.findByNIC(nic);
+    // Add a new guest if not exists, otherwise return existing
+
+    public Guest addGuest(String token, GuestDTO guestDTO) throws Exception {
+       // if (!isSessionActive(token)) return null;
+          System.out.println(guestDTO.getFullName());
+        Guest existing = guestDAO.findByNIC(guestDTO.getNic());
         if (existing != null) {
             return existing;
         }
 
         Guest guest = new Guest();
-        guest.setFullName(fullName);
-        guest.setNIC(nic);
-        guest.setContactNumber(contactNumber);
-        guest.setEmail(email);
+        guest.setFullName(guestDTO.getFullName());
+        guest.setNIC(guestDTO.getNic());
+        guest.setContactNumber(guestDTO.getContactNumber());
+        guest.setEmail(guestDTO.getEmail());
 
         guestDAO.save(guest);
+        System.out.println("Guest Saved");
+         //adding Log
+        UserActivityLogService.getInstance().log(
+                token,
+                "CREATE",
+                "BILLING",
+                 guest.getGuestID(),
+                "Added a new  guest"
+        );
+
+
+
         return guest;
     }
 
+    public List<Guest> getAllGuests() {
+        try {
+            return guestDAO.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 
      // Update existing guest info
@@ -76,8 +107,8 @@ public class GuestService {
     }
 
     private boolean isSessionActive(String token) {
-        Session session = SessionManager.getSession(token);
-        if (session == null) {
+        boolean session = SessionManager.isValidToken(token);
+        if (!session) {
             System.out.println("Session inactive or expired. Please login again.");
             return false;
         }

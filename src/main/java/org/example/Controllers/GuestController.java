@@ -1,90 +1,162 @@
 package org.example.Controllers;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 import org.example.DTO.GuestDTO;
 import org.example.Models.Guest;
 import org.example.Services.GuestService;
 import org.example.Util.SessionManager;
 
-public class GuestController {
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+
+
+@WebServlet("/api/guests")
+public class GuestController extends HttpServlet {
 
     private GuestService guestService;
 
-    public GuestController() {
-        this.guestService = new GuestService();
+    @Override
+    public void init() {
+        guestService = new GuestService();
     }
 
 
-     // Check if guest exists by NIC or add new guest
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    public Guest handleGuest(String token, GuestDTO guestDTO) {
-        if (!isSessionActive(token)) return null;
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
 
-        // First, check if guest exists
-        Guest existingGuest = guestService.findGuestByNIC(token, guestDTO.getNic());
-        if (existingGuest != null) {
-            System.out.println("Guest already registered: " + existingGuest.getFullName());
-            return existingGuest;
-        }
+        String token = request.getParameter("token");
 
-        // Add new guest if not found
-        Guest newGuest = guestService.addGuest(
-                token,
-                guestDTO.getFullName(),
-                guestDTO.getNic(),
-                guestDTO.getContactNumber(),
-                guestDTO.getEmail()
-        );
+        /*if (!SessionManager.isValidToken(token)) {
+            out.print("{\"error\":\"Invalid or missing token\"}");
+            return;
+        }*/
 
-        System.out.println("New guest added: " + newGuest.getFullName());
-        return newGuest;
-    }
+        String nic = request.getParameter("nic");
 
-
-     // Update guest info
-
-    public Guest updateGuest(String token, String nic, GuestDTO updatedInfo) {
-        if (!isSessionActive(token)) return null;
-
-        Guest updatedGuest = guestService.updateGuest(
-                token,
-                nic,
-                updatedInfo.getFullName(),
-                updatedInfo.getContactNumber(),
-                updatedInfo.getEmail()
-        );
-
-        if (updatedGuest != null) {
-            System.out.println("Guest updated: " + updatedGuest.getFullName());
+        if (nic != null && !nic.isEmpty()) {
+            Guest g = guestService.findGuestByNIC(nic);
+            if (g != null) {
+                out.print("{"
+                        + "\"found\":true,"
+                        + "\"id\":" + g.getGuestID() + ","
+                        + "\"name\":\"" + g.getFullName() + "\","
+                        + "\"contact\":\"" + g.getContactNumber() + "\","
+                        + "\"email\":\"" + g.getEmail() + "\""
+                        + "}");
+            } else {
+                out.print("{\"found\":false}");
+            }
         } else {
-            System.out.println("Guest not found for NIC: " + nic);
+            List<Guest> allGuests = guestService.getAllGuests();
+            out.print("[");
+            for (int i = 0; i < allGuests.size(); i++) {
+                Guest g = allGuests.get(i);
+                out.print("{\"id\":" + g.getGuestID() + ",\"name\":\"" + g.getFullName() + "\"}"
+                        + (i < allGuests.size() - 1 ? "," : ""));
+            }
+            out.print("]");
         }
-        return updatedGuest;
+
+        out.flush();
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-     // Delete guest
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
 
-    public boolean deleteGuest(String token, String nic) {
-        if (!isSessionActive(token)) return false;
+        String token = request.getParameter("token");
+       /* if (!SessionManager.isValidToken(token)) {
+            out.print("{\"error\":\"Invalid or missing token\"}");
+            return;
+        }*/
+        System.out.println("Came to the Guest COntroller");
+        String fullName = request.getParameter("fullName");
+        String nic = request.getParameter("nic");
+        String contactNumber = request.getParameter("contactNumber");
+        String email = request.getParameter("email");
 
-        boolean deleted = guestService.deleteGuest(token, nic);
+        GuestDTO guestDTO = new GuestDTO();
+        guestDTO.setFullName(fullName);
+        guestDTO.setNic(nic);
+        guestDTO.setContactNumber(contactNumber);
+        guestDTO.setEmail(email);
 
-        if (deleted) {
-            System.out.println("Guest deleted: " + nic);
-        } else {
-            System.out.println("Guest not found or could not delete: " + nic);
+        try {
+            guestService.addGuest(token, guestDTO);
+            out.print("{\"success\":true}");
+        } catch (Exception e) {
+            out.print("{\"error\":true,\"message\":\"" + e.getMessage() + "\"}");
         }
-        return deleted;
+
+        out.flush();
     }
 
-    /**
-     * Validate session token
-     */
-    private boolean isSessionActive(String token) {
-        if (SessionManager.getSession(token) == null) {
-            System.out.println("Session inactive or expired. Please login again.");
-            return false;
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+
+        String token = request.getParameter("token");
+        if (!SessionManager.isValidToken(token)) {
+            out.print("{\"error\":\"Invalid or missing token\"}");
+            return;
         }
-        return true;
+
+        int guestId = Integer.parseInt(request.getParameter("guestId"));
+        String fullName = request.getParameter("fullName");
+        String contactNumber = request.getParameter("contactNumber");
+        String email = request.getParameter("email");
+
+        GuestDTO guestDTO = new GuestDTO();
+        guestDTO.setFullName(fullName);
+        guestDTO.setContactNumber(contactNumber);
+        guestDTO.setEmail(email);
+
+        try {
+          //  guestService.updateGuest(token, guestId, guestDTO);
+            out.print("{\"success\":true}");
+        } catch (Exception e) {
+            out.print("{\"error\":true,\"message\":\"" + e.getMessage() + "\"}");
+        }
+
+        out.flush();
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+
+        String token = request.getParameter("token");
+        if (!SessionManager.isValidToken(token)) {
+            out.print("{\"error\":\"Invalid or missing token\"}");
+            return;
+        }
+
+        int guestId = Integer.parseInt(request.getParameter("guestId"));
+
+        try {
+           // guestService.deleteGuest(token, guestId);
+            out.print("{\"success\":true}");
+        } catch (Exception e) {
+            out.print("{\"error\":true,\"message\":\"" + e.getMessage() + "\"}");
+        }
+
+        out.flush();
     }
 }
