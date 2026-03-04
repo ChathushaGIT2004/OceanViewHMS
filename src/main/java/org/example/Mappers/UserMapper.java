@@ -25,6 +25,7 @@ public class UserMapper {
         user.setEmail(rs.getString("Email"));
         user.setStatus(rs.getString("Status"));
 
+
         return user;
     }
 
