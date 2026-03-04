@@ -14,7 +14,8 @@ public class RoomAllocationMapper {
 
         RoomAllocation allocation = new RoomAllocation();
 
-        allocation.setAllocationID(rs.getInt("ReservationID"));
+        allocation.setAllocationID(rs.getInt("AllocationID"));
+        allocation.setReservationId(rs.getInt("ReservationID"));
 
         // ---- Room Mapping ----
         Room room = new Room();
