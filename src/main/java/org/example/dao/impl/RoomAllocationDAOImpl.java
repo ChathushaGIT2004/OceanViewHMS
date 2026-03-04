@@ -46,6 +46,7 @@ public class RoomAllocationDAOImpl implements RoomAllocationDAO {
     // ==============================
     @Override
     public List<RoomAllocation> getByReservationId(int reservationID) {
+         System.out.println("ReservationID="+reservationID);
         List<RoomAllocation> list = new ArrayList<>();
         String sql = "SELECT * FROM RoomAllocation WHERE ReservationID=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
