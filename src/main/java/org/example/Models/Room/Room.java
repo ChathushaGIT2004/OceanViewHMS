@@ -4,6 +4,7 @@ public class Room {
     private int roomID;
     private int roomType;
     private String roomStatus; // Available, Occupied, Maintenance
+     private RoomType roomTypeOB;
 
     public int getRoomID() {
         return roomID;
@@ -27,6 +28,14 @@ public class Room {
 
     public void setRoomType(int roomType) {
         this.roomType = roomType;
+    }
+
+    public RoomType getRoomTypeOB() {
+        return roomTypeOB;
+    }
+
+    public void setRoomTypeOB(RoomType roomTypeOB) {
+        this.roomTypeOB = roomTypeOB;
     }
 }
 

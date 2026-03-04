@@ -60,7 +60,7 @@ public class RoomDAOImpl implements RoomDAO {
 
     @Override
     public List<Room> findAvailableRooms() {
-        String sql = "SELECT * FROM rooms WHERE RoomStatus='Available' ";
+        String sql = "SELECT * FROM rooms WHERE RoomStatus='AVAILABLE' ";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -92,6 +92,18 @@ public class RoomDAOImpl implements RoomDAO {
             ps.setInt(1, room.getRoomType());
             ps.setString(2, room.getRoomStatus());
             ps.setInt(3, room.getRoomID());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateStatus(Room room) {
+        String sql = "UPDATE Rooms SET   RoomStatus=? WHERE RoomID=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, room.getRoomStatus());
+            ps.setInt(2, room.getRoomID());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

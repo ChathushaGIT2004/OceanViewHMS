@@ -11,6 +11,9 @@ public interface RoomDAO {
     List<Room> findAvailableRooms();
     void save(Room room);
     void update(Room room);
+
+    void updateStatus(Room room);
+
     void delete(int roomID);
 
     List<Room> findByRoomType(int roomTypeID);
