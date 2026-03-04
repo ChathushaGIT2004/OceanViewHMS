@@ -13,7 +13,7 @@ public class RoomTypeDAOImpl implements RoomTypeDAO {
 
     @Override
     public RoomType findById(int roomTypeID) {
-        System.out.println("Room type DAO Method accessed");
+
         String sql = "SELECT * FROM RoomType WHERE RoomTypeID = ?";
 
         try {
