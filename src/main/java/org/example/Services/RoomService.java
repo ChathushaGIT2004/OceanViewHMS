@@ -42,6 +42,10 @@ public class RoomService {
         roomDAO.update(room);
     }
 
+    public void updateRoomStatus(Room room) {
+        roomDAO.updateStatus(room);
+    }
+
     // Delete a room by ID
     public void deleteRoom(int roomID) {
         roomDAO.delete(roomID);
