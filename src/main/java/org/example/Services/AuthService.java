@@ -8,6 +8,7 @@ import org.example.dao.UserActivityLogDAO;
 import org.example.dao.impl.UserDAOImpl;
 import org.example.dao.impl.UserActivityLogDAOImpl;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class AuthService {
         log.setActionTarget("AuthService");
         log.setTargetReferenceID(0);
         log.setActionDetails(message);
-        log.setActionTimestamp(LocalDateTime.now());
+        log.setActionTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
         try {
             activityLogDAO.save(log);
