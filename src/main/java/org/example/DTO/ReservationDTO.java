@@ -12,7 +12,7 @@ public class ReservationDTO {
     private int numberOFGuests;
     private double totalAmount;
     private String status;
-    private List<Integer> roomIds; // List of room IDs to allocate
+    private List<Integer> roomIds;
 
     // Getters and setters
     public int getGuestID() { return guestID; }

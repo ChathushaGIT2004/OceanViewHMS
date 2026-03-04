@@ -32,7 +32,7 @@ public class ReservationMapper {
         // ---------- Reservation Details ----------
         if (rs.getTimestamp("ReservationDate") != null) {
             res.setReservationDate(
-                    rs.getTimestamp("ReservationDate").toLocalDateTime()
+                    rs.getDate("ReservationDate")
             );
         }
 

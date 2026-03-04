@@ -20,6 +20,7 @@ import org.example.dao.impl.RoomTypeDAOImpl;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ReservationService {
 
@@ -96,7 +97,7 @@ public class ReservationService {
             allocationService.addRoomToReservation(reservationId,allocation.getRoom().getRoomID());
 
             room.setRoomStatus("RESERVED");
-            roomService.updateRoom(room);
+            roomService.updateRoomStatus(room);
 
             allocations.add(allocation);
         }
@@ -114,7 +115,7 @@ public class ReservationService {
     
     //  GET ALL RESERVATIONS 
     
-    public List<ReservationDTO> getAllReservations(String token) {
+    public List<ReservationDTO> getAllReservations() {
 
         List<Reservation> reservations = reservationDAO.getAll();
         List<ReservationDTO> dtoList = new ArrayList<>();
@@ -148,9 +149,39 @@ public class ReservationService {
 
     
     //  GET RESERVATION BY ID
-    
+
     public Reservation getReservationById(int reservationID) {
-        return reservationDAO.getById(reservationID);
+
+        // Fetch the reservation
+        Reservation reservation = reservationDAO.getById(reservationID);
+        if (reservation == null) return null;
+
+        // Fetch guest info (assuming lazy loading might be used)
+        Guest guest = reservation.getGuest();
+
+        // Fetch room allocations
+        List<RoomAllocation> allocations = allocationService.getByReservationId(reservationID);
+        List<RoomAllocation> fullAllocations = new ArrayList<>();
+
+        for (RoomAllocation alloc : allocations) {
+            // Fetch full room info
+            Room room = roomService.getRoomById(alloc.getRoom().getRoomID());
+
+            if (room != null) {
+                // Fetch room type details
+                RoomType type = roomTypeDAO.findById(room.getRoomType());
+                room.setRoomTypeOB(type);
+
+                // Assign room to allocation
+                alloc.setRoom(room);
+            }
+
+            fullAllocations.add(alloc);
+        }
+
+        reservation.setRoomAllocationList(fullAllocations);
+
+        return reservation;
     }
 
     
@@ -200,6 +231,23 @@ public class ReservationService {
             response.setMessage("Reservation not found");
             return response;
         }
+        System.out.println("Exsisting reservation found "+dto.getStatus());
+
+        if ("cancelled".equals(dto.getStatus())){
+            List<RoomAllocation> allocations =
+                    allocationService.getByReservationId(dto.getID());
+
+            for (RoomAllocation alloc : allocations) {
+
+                Room room = alloc.getRoom();
+                room.setRoomStatus("AVAILABLE");
+                roomService.updateRoomStatus(room);
+
+                allocationService.removeRoomFromReservation(alloc.getAllocationID(),false);
+            }
+
+
+        }
 
         // Update only the status
         existing.setStatus(dto.getStatus());
@@ -225,7 +273,7 @@ public class ReservationService {
 
             Room room = alloc.getRoom();
             room.setRoomStatus("AVAILABLE");
-            roomService.updateRoom(room);
+            roomService.updateRoomStatus(room);
 
             allocationService.removeRoomFromReservation(alloc.getAllocationID(),false);
         }
@@ -235,6 +283,7 @@ public class ReservationService {
     }
 
     public double calculateReservationTotal(int reservationId) {
+        System.out.println("Calculate the Reservation TOtal Accessed");
         Reservation reservation = reservationDAO.getById(reservationId);
         if (reservation == null) return 0;
 
@@ -242,9 +291,13 @@ public class ReservationService {
         List<RoomAllocation> allocations = allocationService.getByReservationId(reservationId);
 
         for (RoomAllocation alloc : allocations) {
-            Room room = alloc.getRoom();
+            Room room = roomService.getRoomById(alloc.getRoom().getRoomID());
+            System.out.println("Room Model =\nRoomID "+room.getRoomID()+"\nRoom Type : "+room.getRoomType()+"\nRoom Status : "+room.getRoomStatus());
             RoomType type = roomTypeDAO.findById(room.getRoomType());
+            System.out.println("Roomtype Fetch:"+type.getRoomTypeID());
             total += reservation.getNumberofNights() * type.getChargePerNight();
+
+            System.out.println("Calculated"+total);
         }
 
         reservation.setTotalAmount(total);
