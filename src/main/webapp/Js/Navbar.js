@@ -1,14 +1,16 @@
 // Js/Navbar.js
 
 const sidebarPages = [
-    { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOMPAGE" },
+     { href: "Billing.html", icon: "fa-file-invoice", title: "Billing", feature: "ACCESS_BILLING_PAGE" },
     { href: "Reservation.html", icon: "fa-calendar-check", title: "Reservations", feature: "ACCESS_RESERVATIONPAGE" },
     { href: "Users.html", icon: "fa-users", title: "Users", feature: "ACCESS_USERSPAGE" },
-    { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: "ACCESS_PROFILE_PAGE" }
+     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOMPAGE" },
+    { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: "ACCESS_PROFILE_PAGE" },
+   
 ];
 
 const Prefix = "<a href='Dashboard.html' class='sidebar-nav-item'><i class='fas fa-home'></i><span>Dashboard</span></a>";
-const Suffix = "<a href='Settings.html' class='sidebar-nav-item'><i class='fas fa-cogs'></i><span>Settings</span></a>" +
+const Suffix = " <a href='Help.html' class='sidebar-nav-item'><i class='fas fa-question-circle'></i><span>Help</span></a>" +
                "<a href='Logout.html' id='logoutBtn' class='sidebar-nav-item'><i class='fas fa-sign-out-alt'></i><span>Logout</span></a>";
 
 function populateSidebar() {
