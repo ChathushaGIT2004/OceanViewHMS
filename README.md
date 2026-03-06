@@ -29,6 +29,4 @@ This project was developed as a part of professional software development course
 Versioning
 Version 1.0: Initial implementation of core HMS features.
 
----
-
-## Project Structure
+--
