@@ -33,29 +33,34 @@ public class RoleFeatureManager {
                 Feature.ACCESS_USERSPAGE,
                 Feature.ACCESS_ROOMPAGE,
                 Feature.ACCESS_RESERVATIONPAGE,
-                Feature.ACCESS_GUEST_PAGE,
-                Feature.ACCESS_PROFILE_PAGE
+               // Feature.ACCESS_GUEST_PAGE,
+                Feature.ACCESS_PROFILE_PAGE,
+                Feature.ACCESS_BILLING_PAGE
         ));
 
         // RECEPTIONIST permissions: Limited access
         roleFeatures.put("receptionist", Set.of(
-                Feature.VIEW_USERS,
+
+
+                Feature.ACCESS_BILLING_PAGE,
+                Feature.ACCESS_RESERVATIONPAGE,
+                Feature.ACCESS_GUEST_PAGE,
+                Feature.ACCESS_PROFILE_PAGE,
+
                 Feature.CREATE_BILLING,
                 Feature.VIEW_BILLING,
+                Feature.DELETE_BILLING,
                 Feature.UPDATE_PASSWORD,
+
+                Feature.VIEW_ROOMS,
                 Feature.CREATE_RESERVATION,
+                Feature.UPDATE_RESERVATION,
+                Feature.DELETE_RESERVATION,
                 Feature.VIEW_RESERVATIONS
+
         ));
 
-        // MANAGER permissions: View-only for monitoring
-        roleFeatures.put("manager", Set.of(
-                Feature.VIEW_USERS,
-                Feature.VIEW_BILLING,
-                Feature.UPDATE_PASSWORD,
-                Feature.VIEW_ROOMS,
-                Feature.VIEW_RESERVATIONS,
-                Feature.VIEW_ACTIVITY_LOGS
-        ));
+
     }
 
     // Get all features assigned to a role (role string converted to lowercase)
