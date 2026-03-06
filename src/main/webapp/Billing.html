@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Billing Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="Css/Styles.css"> 
+    <style>
+  
+ 
+
+        /* ===== SECTIONS (white cards) ===== */
+        .section {
+            background: white;
+            border-radius: 28px;
+            padding: 20px 16px;
+            box-shadow: 0 12px 30px -12px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
+            border: 1px solid #f0f4fe;
+            overflow: hidden;
+        }
+
+        .section h2 {
+            margin: 0 0 16px 0;
+            color: #0a2540;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 2px solid #eef4ff;
+            padding-bottom: 12px;
+        }
+ 
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-paid { background: #d1fae5; color: #065f46; }
+        .badge-unpaid { background: #fee2e2; color: #991b1b; }
+
+        /* ===== FILTER GROUP ===== */
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 12px 0 8px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 16px;
+            border-radius: 40px;
+            border: 1px solid #dde3ed;
+            background: white;
+            font-size: 0.95rem;
+            flex: 1 1 160px;
+            min-width: 140px;
+        }
+
+        /* ===== MODAL - COMPLETELY REDESIGNED ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0, 20, 40, 0.3);
+            animation: modalAppear 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Modal header */
+        .modal-header {
+            padding: 24px 28px 16px;
+            border-bottom: 2px solid #eef4ff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0a2540;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            background: #eef4ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #2A7BE4;
+        }
+
+        /* Modal body - scrollable */
+        .modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Modal footer */
+        .modal-footer {
+            padding: 20px 28px 24px;
+            border-top: 2px solid #eef4ff;
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            background: #fafcff;
+        }
+
+        .modal-footer button {
+            min-width: 120px;
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+
+        /* Form elements inside modals */
+        .modal-body label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .modal-body input,
+        .modal-body select {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 60px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .modal-body input:focus,
+        .modal-body select:focus {
+            outline: none;
+            border-color: #2A7BE4;
+            box-shadow: 0 0 0 4px rgba(42,123,228,0.15);
+        }
+
+        /* Info grid inside modals */
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 500px) {
+            .modal-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .modal-info-item {
+            background: #f8fcff;
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e4edf9;
+            transition: 0.2s;
+        }
+
+        .modal-info-item .label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .modal-info-item .value {
+            font-weight: 700;
+            color: #2A7BE4;
+            font-size: 1.1rem;
+        }
+
+        /* Items table inside view modal */
+        .modal-items-wrapper {
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 20px;
+            border: 1px solid #e9edf4;
+            background: white;
+            margin: 20px 0 10px;
+        }
+
+        .modal-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 400px;
+        }
+
+        .modal-items-table th {
+            background: #f0f6ff;
+            color: #0a2540;
+            padding: 14px 12px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            font-weight: 600;
+            border-bottom: 2px solid #2A7BE4;
+        }
+
+        .modal-items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf1f7;
+        }
+
+        .btn-remove {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-remove:hover {
+            background: #fecaca;
+            transform: scale(1.05);
+        }
+
+        /* Add item button inside view modal */
+        .btn-add-item {
+            background: #2A7BE4;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 8px 0;
+            width: 100%;
+            justify-content: center;
+        }
+        @media (min-width: 500px) {
+            .btn-add-item {
+                width: auto;
+            }
+        }
+        .btn-add-item:hover {
+            background: #1e5bbf;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -6px #2A7BE4;
+        }
+
+        /* ===== UTILITIES ===== */
+        .flex-between {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        @media (min-width: 600px) {
+            .flex-between {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+ 
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 id="navUsername">Chathusha Dewmith</h3>
+            <p id="navRoleid">Receptionaist</p>
+        </div>
+         
+        <nav class="sidebar-nav" id="sidebarNav">
+            
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+         <div class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h2>Rooms Management</h2>
+            </div>
+            <div class="header-right">
+                 <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                 
+            </div>
+            
+           
+        </div>
+        
+        <div class="page-content">
+
+        <!-- METRICS CARDS -->
+       <div class="stats-grid">
+        <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h2 id="totalBills">0</h2>
+                    <p>Total Bills</p>
+                </div>
+            </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h2 id="paidBills">0</h2>
+                        <p>Paid Bills</p>
+                    </div>
+                </div>      
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h2 id="unpaidBills">0</h2>
+                        <p>Unpaid Bills</p>
+                    </div>
+                </div>    
+                    
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h2 id="totalRevenue">LKR 0</h2>
+                        <p>Total Revenue</p>
+                    </div>
+                    </div>    
+        </div>
+
+        <!-- RESERVATIONS SECTION -->
+        <div class="section">
+            <h2> Reservations (Available to Bill)</h2> 
+                <table id="reservationsTable">
+                    <thead><tr><th>ID</th><th>Guest</th><th>Check-In</th><th>Check-Out</th> <th>Total</th><th>Action</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+        </div>
+
+        <!-- BILLINGS SECTION -->
+        <div class="section">
+            <div class="flex-between">
+                <h2 style="border:none; padding:0;"><i></i> All Billings</h2>
+                <div class="filter-group">
+                    <input type="text" id="searchBill" placeholder="Search ID or Guest" onkeyup="applyBillingFilters()">
+                    <select id="statusBillFilter" onchange="applyBillingFilters()">
+                        <option value="">All Status</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                    </select>
+                    <select id="limitBillSelect" onchange="applyBillingFilters()">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+            </div>
+             
+                <table id="billingsTable">
+                    <thead><tr><th>Bill ID</th><th>Guest</th><th>Total</th><th>Discount</th><th>Taxes</th><th>Status</th><th>Created</th><th>Payment Date</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+             
+        </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== GENERATE BILL MODAL - REDESIGNED ========== -->
+<div id="generateBillModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-icon">🧾</span>
+            <h2>Generate Bill</h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <span class="label">Reservation ID</span>
+                    <span class="value" id="modalReservationId">-</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="label">Total Amount</span>
+                    <span class="value" id="modalTotalAmount">0.00</span>
+                </div>
+            </div>
+
+            <label for="modalDiscount">Discount (LKR)</label>
+            <input type="number" id="modalDiscount" value="0" min="0" step="0.01" placeholder="0.00">
+
+            <label for="modalTaxes">Taxes (LKR)</label>
+            <input type="number" id="modalTaxes" value="0" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeGenerateModal()">Cancel</button>
+            <button class="btn-primary" onclick="submitGenerateBill()">Generate Bill</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== VIEW BILL MODAL - COMPLETELY REDESIGNED ========== -->
+<div id="viewBillModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-icon">📋</span>
+            <h2>Bill Details</h2>
+        </div>
+        <div class="modal-body">
+            <!-- Summary Section -->
+            <div style="background: #f8fcff; border-radius: 24px; padding: 20px; margin-bottom: 24px;">
+                <div class="modal-info-grid">
+                    <div class="modal-info-item"><span class="label">Bill ID</span> <span class="value" id="viewBillId"></span></div>
+                    <div class="modal-info-item"><span class="label">Guest</span> <span class="value" id="viewGuestName"></span></div>
+                    <div class="modal-info-item"><span class="label">Net Price</span> <span class="value" id="viewNetPrice"></span></div>
+                    <div class="modal-info-item"><span class="label">Gross Price</span> <span class="value" id="viewGrossPrice"></span></div>
+                    <div class="modal-info-item"><span class="label">Discount</span> <span class="value" id="viewDiscount"></span></div>
+                    <div class="modal-info-item"><span class="label">Taxes</span> <span class="value" id="viewTaxes"></span></div>
+                    <div class="modal-info-item"><span class="label">Amount Paid</span> <span class="value" id="viewAmountPaid"></span></div>
+                    <div class="modal-info-item"><span class="label">Balance Due</span> <span class="value" id="viewBalanceDue"></span></div>
+                    <div class="modal-info-item"><span class="label">Status</span> <span class="value" id="viewPaymentStatus"></span></div>
+                    <div class="modal-info-item"><span class="label">Method</span> <span class="value" id="viewPaymentMethod"></span></div>
+                </div>
+            </div>
+
+            <!-- Timestamps -->
+            <h3 style="font-size: 1.2rem; margin: 24px 0 12px; color: #0a2540; display: flex; gap: 8px;">⏱️ Timestamps</h3>
+            <div class="modal-info-grid" style="margin-bottom: 20px;">
+                <div class="modal-info-item"><span class="label">Created</span> <span class="value" id="viewCreatedAt"></span></div>
+                <div class="modal-info-item"><span class="label">Updated</span> <span class="value" id="viewUpdatedAt"></span></div>
+                <div class="modal-info-item"><span class="label">Payment Date</span> <span class="value" id="viewPaymentDate"></span></div>
+            </div>
+
+            <!-- Items Section -->
+            <h3 style="font-size: 1.2rem; margin: 24px 0 12px; color: #0a2540; display: flex; gap: 8px;">🛒 Items</h3>
+            <div class="modal-items-wrapper">
+                <table class="modal-items-table">
+                    <thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Price</th><th>Action</th></tr></thead>
+                    <tbody id="viewItemsBody"></tbody>
+                </table>
+            </div>
+
+            <button class="btn-add-item" onclick="showAddItemModal()">
+                <span>➕</span> Add New Item
+            </button>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== ADD ITEM MODAL - REDESIGNED ========== -->
+<div id="addItemModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-icon">➕</span>
+            <h2>Add Billing Item</h2>
+        </div>
+        <div class="modal-body">
+            <label for="itemType">Item Type</label>
+            <select id="itemType">
+                <option value="DineIn">Dine-In</option>
+                <option value="Spa">Spa</option>
+                <option value="Laundry">Laundry</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="itemDescription">Description</label>
+            <input type="text" id="itemDescription" placeholder="e.g., Breakfast, Massage">
+
+            <label for="itemPrice">Price (LKR)</label>
+            <input type="number" id="itemPrice" min="0" step="0.01" placeholder="0.00">
+
+            <label for="itemQuantity">Quantity</label>
+            <input type="number" id="itemQuantity" value="1" min="1">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeAddItemModal()">Cancel</button>
+            <button class="btn-primary" onclick="submitAddItem()">Add Item</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== PAY BILL MODAL - REDESIGNED ========== -->
+<div id="payBillModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-icon">💳</span>
+            <h2>Pay Bill</h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <span class="label">Bill ID</span>
+                    <span class="value" id="payBillId"></span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="label">Total Amount</span>
+                    <span class="value" id="payTotalAmount"></span>
+                </div>
+            </div>
+
+            <label for="payAmount">Payment Amount (LKR)</label>
+            <input type="number" id="payAmount" min="0.01" step="0.01" required placeholder="Enter amount">
+
+            <label for="payMethod">Payment Method</label>
+            <select id="payMethod">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closePayModal()">Cancel</button>
+            <button class="btn-success" onclick="submitPayBill()">Pay Now</button>
+        </div>
+    </div>
+</div>
+
+<script src="Js/Config.js"></script>
+<script src="Js/FeatureManager.js"></script>
+<script src="Js/Navbar.js"></script>
+<!-- ========== JAVASCRIPT (unchanged, only IDs preserved) ========== -->
+<script>
+    const BASE_URL = 'http://localhost:8080/Ocean-View-System'; // change as needed
+    let token = sessionStorage.getItem("authToken");
+    console.log("Auth token "+token);
+
+
+    let currentReservationId = null;
+    let currentTotalAmount = 0;
+    let currentPayBillId = null;
+    let currentViewBillId = null;
+
+    // ----- GENERATE BILL -----
+    function generateBilling(reservationID, totalAmount) {
+        currentReservationId = reservationID;
+        currentTotalAmount = totalAmount;
+        document.getElementById('modalReservationId').innerText = reservationID;
+        document.getElementById('modalTotalAmount').innerText = totalAmount;
+        document.getElementById('modalDiscount').value = 0;
+        document.getElementById('modalTaxes').value = 0;
+        document.getElementById('generateBillModal').classList.add('show');
+    }
+    function closeGenerateModal() {
+        document.getElementById('generateBillModal').classList.remove('show');
+    }
+    function submitGenerateBill() {
+        const discount = parseFloat(document.getElementById('modalDiscount').value);
+        const taxes = parseFloat(document.getElementById('modalTaxes').value);
+
+        if (isNaN(discount) || discount < 0 || isNaN(taxes) || taxes < 0) {
+            alert("Please enter valid non-negative numbers.");
+            return;
+        }
+
+
+        const token = sessionStorage.getItem('authToken');
+        console.log("token "+token);
+
+        const billableItem = {
+            Id: currentReservationId,
+            itemType: "Reservation",
+            price: parseFloat(currentTotalAmount)
+        };
+
+        const payload = {
+            token,       // <-- include token here
+            discount,
+            taxes,
+            guestId: currentReservationId, // assuming guestId is reservationID; change if different
+            billableItem
+        };
+
+        fetch(BASE_URL + '/api/billing/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(resp => {
+                alert(resp.message);
+                closeGenerateModal();
+                loadBillings();
+            })
+            .catch(err => {
+                alert('Error generating bill');
+                console.error(err);
+            });
+    }
+    // ----- VIEW BILL -----
+    function viewBill(billID) {
+        currentViewBillId = billID;
+        fetch(BASE_URL + '/api/billing/' + billID)
+            .then(res => res.json())
+            .then(b => {
+                document.getElementById('viewBillId').innerText = b.billID;
+                let guestName = b.guest ? (b.guest.fullName || b.guest.name || 'N/A') : 'N/A';
+                document.getElementById('viewGuestName').innerText = guestName;
+                document.getElementById('viewNetPrice').innerText = b.netPrice.toFixed(2);
+                document.getElementById('viewGrossPrice').innerText = b.grossPrice.toFixed(2);
+                document.getElementById('viewDiscount').innerText = b.discount.toFixed(2);
+                document.getElementById('viewTaxes').innerText = b.taxes.toFixed(2);
+                document.getElementById('viewAmountPaid').innerText = b.amountPaid.toFixed(2);
+                document.getElementById('viewBalanceDue').innerText = b.balanceDue.toFixed(2);
+                document.getElementById('viewPaymentStatus').innerText = b.paymentStatus || 'Unpaid';
+                document.getElementById('viewPaymentMethod').innerText = b.paymentMethod || 'N/A';
+
+                document.getElementById('viewCreatedAt').innerText = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
+                document.getElementById('viewUpdatedAt').innerText = b.updatedAt ? new Date(b.updatedAt).toLocaleString() : 'N/A';
+                document.getElementById('viewPaymentDate').innerText = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
+
+                const items = b.items || [];
+                const tbody = document.getElementById('viewItemsBody');
+                tbody.innerHTML = '';
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.itemID}</td>
+                        <td>${item.itemType || ''}</td>
+                        <td>${item.description || ''}</td>
+                        <td>${(item.price * (item.quantity || 1)).toFixed(2)}</td>
+                        <td><button class="btn-remove" onclick="deleteItem(${item.itemID})">✖</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                document.getElementById('viewBillModal').classList.add('show');
+            })
+            .catch(err => {
+                alert('Error fetching bill details');
+                console.error(err);
+            });
+    }
+   
+    function closeViewModal() {
+        document.getElementById('viewBillModal').classList.remove('show');
+        currentViewBillId = null;
+    }
+
+    // ----- ADD ITEM -----
+    function showAddItemModal() {
+        if (!currentViewBillId) return;
+        document.getElementById('itemType').value = 'DineIn';
+        document.getElementById('itemDescription').value = '';
+        document.getElementById('itemPrice').value = '';
+        document.getElementById('itemQuantity').value = 1;
+        document.getElementById('addItemModal').classList.add('show');
+    }
+    function closeAddItemModal() {
+        document.getElementById('addItemModal').classList.remove('show');
+    }
+    function submitAddItem() {
+        const itemType = document.getElementById('itemType').value;
+        const description = document.getElementById('itemDescription').value;
+        const price = parseFloat(document.getElementById('itemPrice').value);
+        const quantity = parseInt(document.getElementById('itemQuantity').value);
+        if (!description || isNaN(price) || price <= 0 || isNaN(quantity) || quantity < 1) {
+            alert('Please enter valid description, price and quantity');
+            return;
+        }
+        const payload = { itemType, description, price, quantity };
+        fetch(BASE_URL + '/api/billing-items?billID=' + currentViewBillId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(resp => {
+                alert(resp.message);
+                closeAddItemModal();
+                viewBill(currentViewBillId);
+            })
+            .catch(err => {
+                alert('Error adding item');
+                console.error(err);
+            });
+    }
+
+    // ----- DELETE ITEM -----
+    function deleteItem(itemID) {
+        if (!confirm('Remove this item?')) return;
+        fetch(BASE_URL + '/api/billing-items/' + itemID, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(resp => {
+                alert(resp.message);
+                viewBill(currentViewBillId);
+            })
+            .catch(err => {
+                alert('Error removing item');
+                console.error(err);
+            });
+    }
+
+    // ----- PAY BILL -----
+    function payBill(billID) {
+        fetch(BASE_URL + '/api/billing/' + billID)
+            .then(res => res.json())
+            .then(b => {
+                currentPayBillId = b.billID;
+                document.getElementById('payBillId').innerText = b.billID;
+                document.getElementById('payTotalAmount').innerText = b.grossPrice.toFixed(2);
+                document.getElementById('payAmount').value = b.grossPrice.toFixed(2);
+                document.getElementById('payMethod').value = 'Cash';
+                document.getElementById('payBillModal').classList.add('show');
+            })
+            .catch(err => {
+                alert('Error fetching bill for payment');
+                console.error(err);
+            });
+    }
+    function closePayModal() {
+        document.getElementById('payBillModal').classList.remove('show');
+        currentPayBillId = null;
+    }
+    function submitPayBill() {
+        if (!currentPayBillId) return;
+
+        const amount = parseFloat(document.getElementById('payAmount').value);
+        const method = document.getElementById('payMethod').value;
+
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        const payload = {
+            token: token,
+            billID: currentPayBillId,
+            amount: amount,
+            paymentMethod: method
+        };
+
+        fetch(BASE_URL + '/api/billing/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(resp => {
+                alert(resp.message);
+                closePayModal();
+                loadBillings();
+            })
+            .catch(err => {
+                alert('Payment failed');
+                console.error(err);
+            });
+    }
+    // ----- LOAD RESERVATIONS -----
+    function loadReservations() {
+    fetch(BASE_URL + '/api/reservations')
+        .then(res => res.json())
+        .then(data => {
+
+            const tbody = document.querySelector("#reservationsTable tbody");
+            tbody.innerHTML = "";
+
+            console.log("Loaded reservations:", data);
+
+            // 🔹 Filter only billed reservations
+            const billedReservations = data.filter(r => r.status == "checkedout" || r.status == "checkedin");
+
+            billedReservations.forEach(r => {
+
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                    <td>${r.ReservationID}</td>
+                    <td>${r.guestFullname}</td>
+                    <td>${r.checkIn}</td>
+                    <td>${r.checkOut}</td>
+                    <td>${r.totalAmount}</td>
+                     
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                            onclick="generateBilling(${r.reservationID}, ${r.totalAmount})">
+                            Generate
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            window.reservationsForBilling = billedReservations;
+
+        })
+        .catch(err => console.error("Error loading reservations:", err));
+}
+
+    // ----- LOAD BILLINGS -----
+    function loadBillings() {
+        fetch(BASE_URL + '/api/billing/all')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#billingsTable tbody");
+                tbody.innerHTML = "";
+                data.forEach(b => {
+                    const tr = document.createElement("tr");
+                    const statusClass = b.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid';
+                    const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
+                    const paymentDate = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
+                    tr.innerHTML = `
+                        <td>${b.billID}</td>
+                        <td>${b.guest ? (b.guest.fullName || b.guest.name || 'N/A') : 'N/A'}</td>
+                        <td>${b.grossPrice.toFixed(2)}</td>
+                        <td>${b.discount.toFixed(2)}</td>
+                        <td>${b.taxes.toFixed(2)}</td>
+                        <td><span class="badge ${statusClass}">${b.paymentStatus || 'Unpaid'}</span></td>
+                        <td>${createdAt}</td>
+                        <td>${paymentDate}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>
+                            <button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                window.allBillings = data;
+                updateBillingMetrics(data);
+            })
+            .catch(err => console.error("Error loading billings:", err));
+    }
+
+    function updateBillingMetrics(bills) {
+        const total = bills.length;
+        const paid = bills.filter(b => b.paymentStatus === 'Paid').length;
+        const unpaid = total - paid;
+        const revenue = bills.filter(b => b.paymentStatus === 'Paid').reduce((sum, b) => sum + (b.grossPrice || 0), 0);
+        document.getElementById('totalBills').innerText = total;
+        document.getElementById('paidBills').innerText = paid;
+        document.getElementById('unpaidBills').innerText = unpaid;
+        document.getElementById('totalRevenue').innerText = 'LKR ' + revenue.toFixed(2);
+    }
+
+    function applyBillingFilters() {
+        if (!window.allBillings) return;
+        const search = document.getElementById('searchBill').value.toLowerCase();
+        const status = document.getElementById('statusBillFilter').value;
+        let limit = document.getElementById('limitBillSelect').value;
+        let filtered = window.allBillings.filter(b => {
+            const guestName = b.guest ? (b.guest.fullName || b.guest.name || '').toLowerCase() : '';
+            const matchesSearch = b.billID.toString().includes(search) || guestName.includes(search);
+            const matchesStatus = !status || (b.paymentStatus || 'Unpaid') === status;
+            return matchesSearch && matchesStatus;
+        });
+        if (limit !== 'all') {
+            limit = parseInt(limit);
+            filtered = filtered.slice(0, limit);
+        }
+        const tbody = document.querySelector("#billingsTable tbody");
+        tbody.innerHTML = "";
+        filtered.forEach(b => {
+            const statusClass = b.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid';
+            const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
+            const paymentDate = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${b.billID}</td>
+                <td>${b.guest ? (b.guest.fullName || b.guest.name || 'N/A') : 'N/A'}</td>
+                <td>${b.grossPrice.toFixed(2)}</td>
+                <td>${b.discount.toFixed(2)}</td>
+                <td>${b.taxes.toFixed(2)}</td>
+                <td><span class="badge ${statusClass}">${b.paymentStatus || 'Unpaid'}</span></td>
+                <td>${createdAt}</td>
+                <td>${paymentDate}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>
+                    <button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.onload = () => {
+        loadReservations();
+        loadBillings();
+    };
+</script>
+</body>
+</html>

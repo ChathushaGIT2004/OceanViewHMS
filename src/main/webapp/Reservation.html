@@ -1,0 +1,1845 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reservations Management</title>
+    <link rel="stylesheet" href="Css/Styles.css">
+    <style>
+      
+  
+
+       
+
+        /* ===== STEP INDICATOR ===== */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-teal-light);
+            color: white;
+            border-color: var(--primary-teal);
+        }
+
+        .step.completed .step-circle {
+    
+            background: var(--secondary-navy-dark);
+            color: white;
+            border-color: var(--secondary-navy-dark);
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .step.active .step-label {
+            color:var(--primary-teal);
+            font-weight: bold;
+        }
+
+        /* ===== MODAL BACKGROUND ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        /* ===== SCROLLABLE MODAL BOX ===== */
+        .modal-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 750px;
+            max-height: 90vh;
+           overflow: hidden;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e6ecf2;
+            background: #f9fbfd;
+            border-radius: 14px 14px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #1f2d3d;
+        }
+
+        .modal-body {
+            max-height: 80vh;
+            padding: 20px 30px 30px;
+             overflow-y: auto;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #cfd8e3;
+            border-radius: 10px;
+        }
+
+        .form-section {
+            margin-top: 20px;
+            padding: 18px;
+            background: #f7f9fc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-section h3 {
+            margin-top: 0;
+            color: #34495e;
+            font-size: 18px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            border: 1px solid #cfd8e3;
+            font-size: 14px;
+            transition: 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            border-color: #2a7be4;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,123,228,0.15);
+        }
+
+        button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.25s ease;
+        }
+
+        .btn-primary { background: #283747; color: #fff; }
+        .btn-primary:hover { background: #1e2a38; }
+        .btn-success { background: #28a745; color: #fff; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-danger:hover { background: #c0392b; }
+
+        .form-section button {
+            background: #16a085;
+            color: white;
+            margin-bottom: 12px;
+        }
+        .form-section button:hover {
+            background: #12876f;
+        }
+
+        /* ===== SQUARE ROOM BOXES ===== */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .room-square {
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 15px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .room-square:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+        }
+
+        .room-square.selected {
+            background: #007bff;
+            border-color: #0056b3;
+            color: white;
+        }
+
+        .room-square .room-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .room-square .room-price {
+            font-size: 14px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .room-square.selected .room-price {
+            color: #ffd700;
+        }
+
+        .room-square .room-occupancy {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .room-square.selected .room-occupancy {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .room-square .room-checkbox {
+            display: none;
+        }
+
+        /* Selected rooms summary */
+        .selected-rooms-summary {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .selected-rooms-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .selected-room-tag {
+            background: #007bff;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 25px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .selected-room-tag .remove-room {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 0 3px;
+        }
+
+        .selected-room-tag .remove-room:hover {
+            color: #ffc107;
+        }
+
+        /* Occupancy warning */
+        .occupancy-warning {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* ===== CLEAN CALCULATION DISPLAY ===== */
+        .calculation-panel {
+            background: linear-gradient(135deg, #283747 0%, #283747 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .calculation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nights-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .nights-badge i {
+            margin-right: 5px;
+        }
+
+        .calculation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .calculation-table th {
+            text-align: left;
+            padding: 8px 0;
+            color: rgba(255,255,255,0.8);
+            font-weight: normal;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calculation-table td {
+            padding: 8px 0;
+            color: white;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .calculation-table td:last-child {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .calculation-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(255,255,255,0.3);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .calculation-total .amount {
+            font-size: 24px;
+            color: #ffd700;
+        }
+
+        .date-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .date-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .date-info i {
+            opacity: 0.8;
+        }
+
+        .occupancy-info {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        /* Navigation buttons */
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Step visibility */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Guest count input style */
+        .guest-count-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .guest-count-input {
+            width: 100px;
+            text-align: center;
+        }
+
+        .guest-count-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        /* Responsive alignment */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="Js/Config.js"></script>
+    <script src="Js/FeatureManager.js"></script>
+    <script src="Js/Navbar.js"></script>
+
+<div class="app-container">
+
+     <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 id="navUsername">Chathusha Dewmith</h3>
+            <p id="navRoleid">Receptionaist</p>
+        </div>
+         
+        <nav class="sidebar-nav" id="sidebarNav">
+            
+        </nav>
+    </aside>
+
+    <div class="main-content">
+
+         <div class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h2>Rooms Management</h2>
+            </div>
+            <div class="header-right">
+                 <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                 
+            </div>
+            
+           
+        </div>
+
+        <div class="page-content">
+
+        <!-- ================= METRICS ================= -->
+          <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h2 id="totalCount">0</h2>
+                    <p>Total Reservations</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-info">
+                    <h2 id="bookedCount">0</h2>
+                    <p>Booked</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h2 id="checkedInCount">0</h2>
+                    <p>Checked In</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-info">
+                    <h2 id="checkedOutCount">0</h2>
+                    <p>Checked Out</p>
+                </div>
+            </div>
+          </div>
+
+        <!-- ================= TABS ================= -->
+        <div class="tabs">
+            <button class="tab active" data-status="all">All</button>
+            <button class="tab" data-status="booked">New (Booked)</button>
+            <button class="tab" data-status="checkedin">Checked In</button>
+            <button class="tab" data-status="checkedout">Checked Out</button>
+            <button class="tab" data-status="billed">Billed</button>
+            <button class="tab" data-status="cancelled">Canceled</button>
+        </div>
+
+        <!-- ================= CONTROLS ================= -->
+        <div class="controls">
+            <div>
+                <button class="btn btn-primary" onclick="openModal()">+ Add Reservation</button>
+            </div>
+            <div>
+                Search:
+                <input type="text" id="searchInput" onkeyup="applyFilters()">
+                Show:
+                <select id="limitSelect" onchange="applyFilters()">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ================= TABLE ================= -->
+            <table id="reservationsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Guest</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Guests</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Rooms</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+           </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= ADD RESERVATION MODAL ================= -->
+<div id="reservationModal" class="modal" onclick="if(event.target===this) closeModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Reservation</h2>
+            <button class="btn-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1-indicator">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Guest Info</div>
+                </div>
+                <div class="step" id="step2-indicator">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Reservation Info</div>
+                </div>
+                <div class="step" id="step3-indicator">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Select Rooms</div>
+                </div>
+                <div class="step" id="step4-indicator">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Review & Save</div>
+                </div>
+            </div>
+
+            <form id="addReservationForm">
+
+                <!-- Step 1: Guest Information -->
+                <div id="step1" class="step-content active">
+                    <div class="form-section">
+                        <h3>Guest Information</h3>
+
+                        <label>Guest NIC:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="guestNic" placeholder="Enter NIC" style="flex: 1;">
+                            <button type="button" onclick="checkGuestNIC()" style="width: auto; margin-bottom: 14px;">Check</button>
+                        </div>
+
+                        <label>Full Name:</label>
+                        <input type="text" id="guestName" placeholder="Enter full name">
+
+                        <label>Contact:</label>
+                        <input type="text" id="guestContact" placeholder="Enter contact number">
+
+                        <label>Email:</label>
+                        <input type="email" id="guestEmail" placeholder="Enter email address">
+
+                        <input type="hidden" id="guestID" name="guestID">
+
+                        <button type="button" onclick="saveGuest()" class="btn-success">Save Guest & Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Reservation Information -->
+                <div id="step2" class="step-content">
+                    <div class="form-section">
+                        <h3>Reservation Information</h3>
+
+                        <label>Check-In Date & Time:</label>
+                        <input type="datetime-local" id="checkIn" name="checkIn" required onchange="calculateTotalAmount()">
+
+                        <label>Check-Out Date & Time:</label>
+                        <input type="datetime-local" id="checkOut" name="checkOut" required onchange="calculateTotalAmount()">
+
+                        <div class="form-row">
+                            <div style="flex:2;">
+                                <label>Number of Guests:</label>
+                                <div class="guest-count-container">
+                                    <input type="number" id="numberOfGuests" name="numberOfGuests" min="1" max="20" value="1" class="guest-count-input" onchange="updateGuestCount()">
+                                    <span class="guest-count-label">guests</span>
+                                </div>
+                            </div>
+                            <div style="flex:3;">
+                                <label>Status:</label>
+                                <select id="status" name="status">
+                                    <option value="booked">Booked</option>
+                                    <option value="checkedin">Checked In</option>
+                                    <option value="checkedout">Checked Out</option>
+                                    <option value="billed">Billed</option>
+                                    <option value="cancelled">Canceled</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="nextStep(2)" class="btn-success">Continue to Room Selection</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Room Selection with Square Boxes -->
+                <div id="step3" class="step-content">
+                    <div class="form-section">
+                        <h3>Select Rooms</h3>
+
+                        <label>Filter by Room Type:</label>
+                        <select id="roomTypeFilter" onchange="filterRooms()">
+                            <option value="">All Types</option>
+                        </select>
+
+                        <label>Available Rooms (Click to select):</label>
+                        <div id="availableRooms" class="rooms-grid"></div>
+
+                        <!-- Selected rooms summary -->
+                        <div class="selected-rooms-summary">
+                            <strong>Selected Rooms:</strong> <span id="selectedCount">0</span>
+                            <div id="selectedRoomsList" class="selected-rooms-list"></div>
+                            <div id="occupancyWarning" class="occupancy-warning" style="display: none;"></div>
+                        </div>
+
+                        <!-- Hidden input for selected room IDs -->
+                        <input type="hidden" id="selectedRoomIds" name="roomIds">
+
+                        <!-- Clean Calculation Display -->
+                        <div id="calculationDisplay" class="calculation-panel" style="display: none;">
+                            <div class="calculation-header">
+                                <h4 style="margin:0; color:white;"> Price Breakdown</h4>
+                                <span class="nights-badge" id="nightsCount">0 nights</span>
+                            </div>
+
+                            <div class="date-info">
+                                <span> Check-in: <span id="displayCheckIn">Not set</span></span>
+                                <span> Check-out: <span id="displayCheckOut">Not set</span></span>
+                            </div>
+
+                            <div class="occupancy-info" id="occupancyInfo">
+                                <span> Total Occupancy: <strong id="totalOccupancy">0</strong> guests | Your guests: <strong id="displayGuestCount">1</strong></span>
+                            </div>
+
+                            <table class="calculation-table" id="roomBreakdownTable">
+                                <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Rate/Night</th>
+                                    <th>Total</th>
+                                </tr>
+                                </thead>
+                                <tbody id="roomBreakdownBody"></tbody>
+                            </table>
+
+                            <div class="calculation-total">
+                                <span>Total Amount</span>
+                                <span class="amount" id="totalAmount">LKR 0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="nextStep(3)" class="btn-success" style="margin-top: 15px;" id="continueToReviewBtn">Continue to Review</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review & Save -->
+                <div id="step4" class="step-content">
+                    <div class="form-section">
+                        <h3>Review Reservation Details</h3>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin-top: 0; color: #007bff;">Guest Information</h4>
+                            <p><strong>NIC:</strong> <span id="reviewNic"></span></p>
+                            <p><strong>Name:</strong> <span id="reviewName"></span></p>
+                            <p><strong>Contact:</strong> <span id="reviewContact"></span></p>
+                            <p><strong>Email:</strong> <span id="reviewEmail"></span></p>
+                        </div>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin-top: 0; color: #007bff;">Reservation Information</h4>
+                            <p><strong>Check-In:</strong> <span id="reviewCheckIn"></span></p>
+                            <p><strong>Check-Out:</strong> <span id="reviewCheckOut"></span></p>
+                            <p><strong>Nights:</strong> <span id="reviewNights"></span></p>
+                            <p><strong>Number of Guests:</strong> <span id="reviewGuestCount"></span></p>
+                            <p><strong>Status:</strong> <span id="reviewStatus"></span></p>
+                        </div>
+
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="margin-top: 0; color: #007bff;">Room Allocation & Charges</h4>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                <tr style="border-bottom:2px solid #dee2e6;">
+                                    <th style="text-align:left; padding:5px;">Room</th>
+                                    <th style="text-align:left; padding:5px;">Type</th>
+                                    <th style="text-align:right; padding:5px;">Rate/Night</th>
+                                    <th style="text-align:right; padding:5px;">Total</th>
+                                </tr>
+                                </thead>
+                                <tbody id="reviewRoomBreakdown"></tbody>
+                                <tfoot>
+                                <tr style="border-top:2px solid #dee2e6;">
+                                    <td colspan="3" style="text-align:right; padding:10px;"><strong>Total Amount:</strong></td>
+                                    <td style="text-align:right; padding:10px;"><strong id="reviewAmount">LKR 0.00</strong></td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Step Navigation Buttons -->
+            <div class="step-navigation">
+                <button type="button" id="prevBtn" class="btn" onclick="prevStep()" style="background: #6c757d; color: white;">Previous</button>
+                <div>
+                    <button type="button" id="nextBtn" class="btn btn-success" onclick="nextStep()">Next</button>
+                    <button type="button" id="saveBtn" class="btn btn-primary" onclick="addReservation()" style="display: none;">Save Reservation</button>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 10px;">
+                <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
+            </div>
+
+        </div> <!-- modal-body -->
+    </div> <!-- modal-content -->
+</div> <!-- reservationModal -->
+
+<!-- ================= VIEW RESERVATION MODAL ================= -->
+<div id="viewReservationModal" class="modal" onclick="if(event.target===this) closeViewModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Reservation Details</h2>
+            <button class="btn-close" onclick="closeViewModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin-top: 0; color: #007bff;">Guest Information</h4>
+                <p><strong>NIC:</strong> <span id="viewNic"></span></p>
+                <p><strong>Name:</strong> <span id="viewName"></span></p>
+                <p><strong>Contact:</strong> <span id="viewContact"></span></p>
+                <p><strong>Email:</strong> <span id="viewEmail"></span></p>
+            </div>
+
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin-top: 0; color: #007bff;">Reservation Information</h4>
+                <p><strong>Check-In:</strong> <span id="viewCheckIn"></span></p>
+                <p><strong>Check-Out:</strong> <span id="viewCheckOut"></span></p>
+                <p><strong>Nights:</strong> <span id="viewNights"></span></p>
+                <p><strong>Number of Guests:</strong> <span id="viewGuestCount"></span></p>
+                <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+            </div>
+
+            <!-- Room management section -->
+            <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin-top: 0; color: #007bff;">Room Allocation & Charges</h4>
+
+                <!-- Add Room button and visual grid - now conditionally shown -->
+                <div id="addRoomContainer" style="margin-bottom: 15px; display: none;">
+                    <button class="btn btn-success" onclick="showAddRoomGrid()" id="showAddRoomBtn">+ Add Room</button>
+                    <div id="addRoomGridContainer" style="display: none; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin:0;">Select a room to add</h4>
+                            <button class="btn btn-secondary" onclick="hideAddRoomGrid()">Cancel</button>
+                        </div>
+                        <div id="availableRoomsGrid" class="rooms-grid" style="max-height: 300px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                    <tr style="border-bottom:2px solid #dee2e6;">
+                        <th style="text-align:left; padding:5px;">Room</th>
+                        <th style="text-align:left; padding:5px;">Type</th>
+                        <th style="text-align:right; padding:5px;">Rate/Night</th>
+                        <th style="text-align:right; padding:5px;">Total</th>
+                        <th style="text-align:center; padding:5px;" id="removeActionHeader">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="viewRoomBreakdown"></tbody>
+                    <tfoot>
+                    <tr style="border-top:2px solid #dee2e6;">
+                        <td colspan="4" style="text-align:right; padding:10px;"><strong>Total Amount:</strong></td>
+                        <td style="text-align:right; padding:10px;"><strong id="viewAmount">LKR 0.00</strong></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div style="text-align: right; margin-top: 15px;">
+                <button type="button" class="btn btn-danger" onclick="closeViewModal()">Close</button>
+            </div>
+
+        </div> <!-- modal-body -->
+    </div> <!-- modal-content -->
+</div> <!-- viewReservationModal -->
+
+<script>
+
+    const BaseUSL = 'http://localhost:8080/Ocean-View-System/';   // <-- use BaseUSL instead of request.getContextPath()
+
+    const token = sessionStorage.getItem("token");
+
+    let allReservations = [];
+    let allRooms = [];
+    let roomTypes = [];
+    let selectedRooms = [];
+    let currentStep = 1;
+    let guestSaved = false;
+    let activeTab = 'all'; // current tab
+
+    // For view modal
+    let currentViewReservationId = null;
+    let currentViewReservation = null; // store the full reservation object for the view modal
+
+    // Mock data for testing (if needed)
+    const mockRoomTypes = [
+        { roomTypeID: 1, typeName: 'Standard', chargePerNight: 5000, maxOccupancy: 2 },
+        { roomTypeID: 2, typeName: 'Deluxe', chargePerNight: 8000, maxOccupancy: 3 },
+        { roomTypeID: 3, typeName: 'Suite', chargePerNight: 12000, maxOccupancy: 4 }
+    ];
+
+    // Mock rooms with occupancy
+    const mockRooms = [
+        { roomID: 101, roomType: 1, occupancy: 2 },
+        { roomID: 102, roomType: 1, occupancy: 2 },
+        { roomID: 103, roomType: 2, occupancy: 3 },
+        { roomID: 104, roomType: 2, occupancy: 3 },
+        { roomID: 201, roomType: 3, occupancy: 4 },
+        { roomID: 202, roomType: 3, occupancy: 4 }
+    ];
+
+    window.onload = ()=> {
+        fetchRoomTypes();
+        fetchReservations();
+        initTabs();
+        // For testing, preload mock rooms if API not available
+        setTimeout(() => {
+            if (allRooms.length === 0) {
+                allRooms = mockRooms;
+                filterRooms();
+            }
+        }, 500);
+    }
+
+    function initTabs() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const status = this.getAttribute('data-status');
+                switchTab(status);
+            });
+        });
+    }
+
+    function switchTab(status) {
+        activeTab = status;
+        // Update active class on tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            if (tab.getAttribute('data-status') === status) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+        applyFilters();
+    }
+
+    function fetchReservations() {
+        return fetch(BaseUSL + "api/reservations", {
+            method: "GET",
+            headers: {
+                "Session-Token": token
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                allReservations = data;
+                console.log(allReservations);
+                updateMetrics();
+                applyFilters();
+                populateTable(data)
+            })
+            .catch(err => console.error(err));
+    }
+    function updateMetrics(){
+        document.getElementById("totalCount").innerText = allReservations.length;
+        document.getElementById("bookedCount").innerText = allReservations.filter(r=>r.status==="booked").length;
+        document.getElementById("checkedInCount").innerText = allReservations.filter(r=>r.status==="checkedin").length;
+        document.getElementById("checkedOutCount").innerText = allReservations.filter(r=>r.status==="checkedout").length;
+    }
+
+    function applyFilters(){
+        let search = document.getElementById("searchInput").value.toLowerCase();
+        let limit = document.getElementById("limitSelect").value;
+
+        let filtered = allReservations.filter(r => {
+            let matchSearch = r.guest?.toLowerCase().includes(search);
+            return matchSearch;
+        });
+
+        // Apply tab filter
+        if (activeTab !== 'all') {
+            filtered = filtered.filter(r => r.status === activeTab);
+        }
+
+        if(limit !== "all"){
+            filtered = filtered.slice(-parseInt(limit));
+        }
+
+        populateTable(filtered);
+    }
+    function formatDate(dateString){
+        if (!dateString) return "-";
+        return new Date(dateString).toDateString();
+    }
+    function populateTable(data){
+        const tbody = document.querySelector("#reservationsTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(res => {
+            console.log(res)
+            // Fix property names based on backend response
+            const reservationID = res.ReservationID;
+            const guestName = res.guestFullname || "-";
+            const checkIn = formatDate(res.checkIn);
+            const checkOut = formatDate(res.checkOut);
+            const guests = res.numberOFGuests || 0;
+            const totalAmount = res.totalAmount || 0;
+            const status = res.status || "-";
+            const totalRooms = res.roomIds ? res.roomIds.length : 0;
+
+            // Build action buttons
+            let actions = `<button class="btn btn-info" onclick="viewReservation(${reservationID})">View</button>`;
+
+            if (status === 'booked') {
+                actions += `<button class="btn btn-success" onclick="updateReservationStatus(${reservationID}, 'checkedin')">Check-In</button>`;
+                actions += `<button class="btn btn-danger" onclick="updateReservationStatus(${reservationID}, 'cancelled')">Cancel</button>`;
+            }
+            else if (status === 'checkedin') {
+                actions += `<button class="btn btn-primary" onclick="updateReservationStatus(${reservationID}, 'checkedout')">Check-Out</button>`;
+                actions += `<button class="btn btn-danger" onclick="updateReservationStatus(${reservationID}, 'cancelled')">Cancel</button>`;
+            }
+            else if (status === 'checkedout') {
+                actions += `<button class="btn btn-danger" onclick="updateReservationStatus(${reservationID}, 'cancelled')">Cancel</button>`;
+            }
+
+            tbody.innerHTML += `
+            <tr>
+                <td>${reservationID}</td>
+                <td>${guestName}</td>
+                <td>${checkIn}</td>
+                <td>${checkOut}</td>
+                <td>${guests}</td>
+                <td>LKR ${totalAmount.toLocaleString()}</td>
+                <td>${status}</td>
+                <td>${totalRooms}</td>
+                <td>${actions}</td>
+            </tr>
+        `;
+        });
+    }
+    function openModal(){
+        document.getElementById("reservationModal").classList.add("show");
+        resetToStep1();
+    }
+
+    function closeModal(){
+        document.getElementById("reservationModal").classList.remove("show");
+        resetForm();
+    }
+
+    function resetForm() {
+        document.getElementById("guestNic").value = "";
+        document.getElementById("guestName").value = "";
+        document.getElementById("guestContact").value = "";
+        document.getElementById("guestEmail").value = "";
+        document.getElementById("guestID").value = "";
+        document.getElementById("checkIn").value = "";
+        document.getElementById("checkOut").value = "";
+        document.getElementById("numberOfGuests").value = "1";
+        document.getElementById("status").value = "booked";
+        document.getElementById("selectedRoomIds").value = "";
+        selectedRooms = [];
+        guestSaved = false;
+        updateSelectedRoomsDisplay();
+        resetToStep1();
+    }
+
+    function resetToStep1() {
+        currentStep = 1;
+        updateStepIndicators();
+        showStep(1);
+        document.getElementById("prevBtn").style.display = "inline-block";
+        document.getElementById("nextBtn").style.display = "inline-block";
+        document.getElementById("saveBtn").style.display = "none";
+    }
+
+    function updateStepIndicators() {
+        for (let i = 1; i <= 4; i++) {
+            const indicator = document.getElementById(`step`+i+`-indicator`);
+            if (i < currentStep) {
+                indicator.className = "step completed";
+            } else if (i === currentStep) {
+                indicator.className = "step active";
+            } else {
+                indicator.className = "step";
+            }
+        }
+    }
+
+    function showStep(step) {
+        document.getElementById("step1").classList.remove("active");
+        document.getElementById("step2").classList.remove("active");
+        document.getElementById("step3").classList.remove("active");
+        document.getElementById("step4").classList.remove("active");
+        document.getElementById("step"+step).classList.add("active");
+
+        if (step === 1) {
+            document.getElementById("prevBtn").style.display = "none";
+        } else {
+            document.getElementById("prevBtn").style.display = "inline-block";
+        }
+
+        if (step === 4) {
+            document.getElementById("nextBtn").style.display = "none";
+            document.getElementById("saveBtn").style.display = "inline-block";
+            updateReviewSection();
+        } else {
+            document.getElementById("nextBtn").style.display = "inline-block";
+            document.getElementById("saveBtn").style.display = "none";
+        }
+
+        if (step === 3) {
+            fetchAvailableRooms();
+        }
+    }
+
+    function nextStep(currentStepParam) {
+        if (currentStepParam) {
+            if (currentStepParam === 1 && !validateGuestInfo()) {
+                return;
+            }
+            if (currentStepParam === 2 && !validateReservationInfo()) {
+                return;
+            }
+            if (currentStepParam === 3 && !validateRoomSelection()) {
+                return;
+            }
+            currentStep = currentStepParam + 1;
+        } else {
+            if (currentStep === 1 && !validateGuestInfo()) {
+                return;
+            }
+            if (currentStep === 2 && !validateReservationInfo()) {
+                return;
+            }
+            if (currentStep === 3 && !validateRoomSelection()) {
+                return;
+            }
+            currentStep++;
+        }
+
+        updateStepIndicators();
+        showStep(currentStep);
+
+        if (currentStep === 3) {
+            fetchAvailableRooms();
+        }
+        if (currentStep === 4) {
+            updateReviewSection();
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepIndicators();
+            showStep(currentStep);
+        }
+    }
+
+    function validateGuestInfo() {
+        if (!guestSaved) {
+            alert("Please save guest information first");
+            return false;
+        }
+        return true;
+    }
+
+    function validateReservationInfo() {
+        const checkIn = document.getElementById("checkIn").value;
+        const checkOut = document.getElementById("checkOut").value;
+        const numberOfGuests = document.getElementById("numberOfGuests").value;
+
+        if (!checkIn || !checkOut) {
+            alert("Please select check-in and check-out dates");
+            return false;
+        }
+
+        if (new Date(checkIn) >= new Date(checkOut)) {
+            alert("Check-out date must be after check-in date");
+            return false;
+        }
+
+        if (!numberOfGuests || numberOfGuests < 1) {
+            alert("Please enter a valid number of guests (minimum 1)");
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateRoomSelection() {
+        if (selectedRooms.length === 0) {
+            alert("Please select at least one room");
+            return false;
+        }
+
+        // Check occupancy
+        const totalOccupancy = selectedRooms.reduce((sum, room) => sum + (room.occupancy || 2), 0);
+        const guestCount = parseInt(document.getElementById("numberOfGuests").value);
+
+        if (guestCount > totalOccupancy) {
+            alert(`Guest count (${guestCount}) exceeds total room occupancy (${totalOccupancy}). Please select more rooms or reduce guests.`);
+            return false;
+        }
+
+        return true;
+    }
+
+    // ===== Guest Functions =====
+    function checkGuestNIC() {
+        const nic=document.getElementById("guestNic").value;
+        if (!nic) {
+            alert("Please enter NIC");
+            return;
+        }
+
+        fetch(BaseUSL + "/api/guests?nic="+nic)
+            .then(res=>res.json())
+            .then(data=>{
+                if(data.found){
+                    console.log(data.id);
+                    document.getElementById("guestName").value=data.name;
+                    document.getElementById("guestContact").value=data.contact;
+                    document.getElementById("guestEmail").value=data.email;
+                    document.getElementById("guestID").value=data.id;
+                    guestSaved = true;
+                    alert("Guest found ✔");
+                } else {
+                    document.getElementById("guestName").value="";
+                    document.getElementById("guestContact").value="";
+                    document.getElementById("guestEmail").value="";
+                    alert("New guest — please enter details");
+                }
+            })
+            .catch(() => {
+                // For testing
+                guestSaved = true;
+                alert("Guest found (test mode) ✔");
+            });
+    }
+
+    function saveGuest(){
+        const nic=document.getElementById("guestNic").value.trim();
+        const name=document.getElementById("guestName").value.trim();
+        const contact=document.getElementById("guestContact").value.trim();
+        const email=document.getElementById("guestEmail").value.trim();
+
+        if(!nic || !name){ alert("NIC and Full Name are required!"); return; }
+
+        const params=new URLSearchParams();
+        params.append("token", token);
+        params.append("nic", nic);
+        params.append("fullName", name);
+        params.append("contactNumber", contact);
+        params.append("email", email);
+
+        fetch(BaseUSL + "/api/guests",{
+            method:"POST",
+            body:params
+        }).then(res=>res.json())
+            .then(data=>{
+                if(data.success){
+                    document.getElementById("guestID").value=data.id;
+                    guestSaved = true;
+                    alert("Guest saved successfully ✔");
+                    nextStep(1);
+                } else if(data.error){ alert("Error: "+data.error); }
+            })
+            .catch(err=>{
+                console.error(err);
+                // For testing
+                guestSaved = true;
+                alert("Guest saved (test mode) ✔");
+                nextStep(1);
+            });
+    }
+
+    // Fetch room types from /roomtypes endpoint
+    function fetchRoomTypes() {
+        fetch(BaseUSL + "/api/roomtypes")
+            .then(res => res.json())
+            .then(data => {
+                roomTypes = data;
+                updateRoomTypeFilter();
+            })
+            .catch(() => {
+                roomTypes = mockRoomTypes;
+                updateRoomTypeFilter();
+            });
+    }
+
+    function updateRoomTypeFilter() {
+        const filter = document.getElementById("roomTypeFilter");
+        filter.innerHTML = '<option value="">All Types</option>';
+        roomTypes.forEach(rt => {
+            filter.innerHTML += `<option value="`+rt.typeName+`">`+rt.typeName+` (LKR `+rt.chargePerNight+`)</option>`;
+        });
+    }
+
+    function fetchAvailableRooms() {
+        fetch(BaseUSL + "/api/rooms?available=true")
+            .then(res => res.json())
+            .then(data => {
+                allRooms = data;
+                filterRooms();
+            })
+            .catch(() => {
+                // Use mock rooms if API fails
+                allRooms = mockRooms;
+                filterRooms();
+            });
+    }
+
+    function filterRooms() {
+        const type = document.getElementById("roomTypeFilter").value;
+        const container = document.getElementById("availableRooms");
+        container.innerHTML = "";
+
+        let filtered = allRooms;
+        if (type) {
+            const typeObj = roomTypes.find(rt => rt.typeName === type);
+            if (typeObj) filtered = allRooms.filter(r => r.roomType === typeObj.roomTypeID);
+        }
+
+        filtered.forEach(r => {
+            const typeObj = roomTypes.find(rt => rt.roomTypeID === r.roomType);
+            const charge = typeObj?.chargePerNight || 0;
+            const occupancy = r.occupancy || typeObj?.maxOccupancy || 2; // fallback
+            const isSelected = selectedRooms.some(room => room.roomID === r.roomID);
+
+            const square = document.createElement("div");
+            square.className = "room-square" + (isSelected ? " selected" : "");
+            square.setAttribute("data-room-id", r.roomID);
+
+            square.innerHTML = `
+                <div class="room-number">Room `+r.roomID+`</div>
+                <div class="room-price">LKR `+charge+`</div>
+                <div class="room-occupancy">Max `+occupancy+` guests</div>
+            `;
+
+            square.onclick = function() { toggleRoomSelection({...r, occupancy}); };
+
+            container.appendChild(square);
+        });
+    }
+
+    function toggleRoomSelection(room) {
+        const index = selectedRooms.findIndex(r => r.roomID === room.roomID);
+
+        if (index === -1) {
+            const typeObj = roomTypes.find(rt => rt.roomTypeID === room.roomType);
+            room.chargePerNight = typeObj?.chargePerNight || 0;
+            room.typeName = typeObj?.typeName || "Unknown";
+            selectedRooms.push(room);
+        } else {
+            selectedRooms.splice(index, 1);
+        }
+
+        filterRooms();
+        updateSelectedRoomsDisplay();
+        calculateTotalAmount();
+
+        document.getElementById("selectedRoomIds").value = selectedRooms.map(r => r.roomID).join(",");
+    }
+
+    function updateSelectedRoomsDisplay() {
+        const container = document.getElementById("selectedRoomsList");
+        const countSpan = document.getElementById("selectedCount");
+        const warningDiv = document.getElementById("occupancyWarning");
+        container.innerHTML = "";
+        countSpan.innerText = selectedRooms.length;
+
+        let totalOccupancy = 0;
+        selectedRooms.forEach(room => {
+            const typeObj = roomTypes.find(rt => rt.roomTypeID === room.roomType);
+            const occupancy = room.occupancy || typeObj?.maxOccupancy || 2;
+            totalOccupancy += occupancy;
+            const tag = document.createElement("span");
+            tag.className = "selected-room-tag";
+            tag.innerHTML = `
+                Room `+room.roomID+` (Max `+occupancy+`)
+                <span class="remove-room" onclick="removeRoom(`+room.roomID+`)">×</span>
+            `;
+            container.appendChild(tag);
+        });
+
+        const guestCount = parseInt(document.getElementById("numberOfGuests").value) || 1;
+        if (guestCount > totalOccupancy) {
+            warningDiv.style.display = "block";
+            warningDiv.innerText = `⚠ Guest count (${guestCount}) exceeds total occupancy (${totalOccupancy}). Please adjust.`;
+            document.getElementById("continueToReviewBtn").disabled = true;
+        } else {
+            warningDiv.style.display = "none";
+            document.getElementById("continueToReviewBtn").disabled = false;
+        }
+
+        // Update calculation panel occupancy
+        document.getElementById("totalOccupancy").innerText = totalOccupancy;
+    }
+
+    function removeRoom(roomId) {
+        selectedRooms = selectedRooms.filter(r => r.roomID !== roomId);
+        filterRooms();
+        updateSelectedRoomsDisplay();
+        calculateTotalAmount();
+        document.getElementById("selectedRoomIds").value = selectedRooms.map(r => r.roomID).join(",");
+    }
+
+    function updateGuestCount() {
+        const guestCount = document.getElementById("numberOfGuests").value;
+        document.getElementById("displayGuestCount").innerText = guestCount;
+        updateSelectedRoomsDisplay(); // Re-check occupancy warning
+    }
+
+    function calculateTotalAmount() {
+        const checkIn = new Date(document.getElementById("checkIn").value);
+        const checkOut = new Date(document.getElementById("checkOut").value);
+        const guestCount = document.getElementById("numberOfGuests").value;
+        const calculationPanel = document.getElementById("calculationDisplay");
+        const roomBreakdownBody = document.getElementById("roomBreakdownBody");
+
+        if (checkIn && checkOut && checkOut > checkIn && selectedRooms.length > 0) {
+            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            let total = 0;
+
+            document.getElementById("displayCheckIn").innerText = checkIn.toLocaleDateString();
+            document.getElementById("displayCheckOut").innerText = checkOut.toLocaleDateString();
+            document.getElementById("nightsCount").innerHTML =  nights + ` night` + (nights > 1 ? 's' : '');
+            document.getElementById("displayGuestCount").innerText = guestCount;
+
+            roomBreakdownBody.innerHTML = "";
+            selectedRooms.forEach(room => {
+                const typeObj = roomTypes.find(rt => rt.roomTypeID === room.roomType);
+                const roomTotal = (typeObj?.chargePerNight || 0) * nights;
+                total += roomTotal;
+
+                roomBreakdownBody.innerHTML += `
+                    <tr>
+                        <td>Room `+room.roomID+`</td>
+                        <td>LKR `+(typeObj?.chargePerNight || 0).toLocaleString()+` x `+nights+`</td>
+                        <td>LKR `+roomTotal.toLocaleString()+`</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("totalAmount").innerText = "LKR " + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            calculationPanel.style.display = "block";
+        } else if (selectedRooms.length === 0) {
+            calculationPanel.style.display = "none";
+        }
+    }
+
+    function addReservation() {
+        // Final occupancy check before saving
+        const totalOccupancy = selectedRooms.reduce((sum, room) => sum + (room.occupancy || 2), 0);
+        const guestCount = parseInt(document.getElementById("numberOfGuests").value);
+        if (guestCount > totalOccupancy) {
+            alert(`Guest count (${guestCount}) exceeds total room occupancy (${totalOccupancy}). Cannot save.`);
+            return;
+        }
+
+        const reservationDTO = {
+            token: token,
+            guestID: parseInt(document.getElementById("guestID").value),
+            guestFullname: document.getElementById("guestName").value,
+            checkIn: document.getElementById("checkIn").value,
+            checkOut: document.getElementById("checkOut").value,
+            numberOfGuests: guestCount,
+            totalAmount: parseFloat(document.getElementById("totalAmount").innerText.replace(/[^\d\.]/g,'')),
+            status: document.getElementById("status").value,
+            roomIds: selectedRooms.map(r => r.roomID)
+        };
+
+        console.log(reservationDTO);
+
+        fetch(BaseUSL + "/api/reservations", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(reservationDTO)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Reservation added successfully ✔");
+                    closeModal();
+                    fetchReservations();
+                } else {
+                    alert("Error adding reservation: " + (data.error || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to add reservation. See console for details.");
+            });
+    }
+
+    // ================== VIEW MODAL ENHANCEMENTS ==================
+
+    function viewReservation(reservationID) {
+        currentViewReservationId = reservationID;
+
+        fetch(BaseUSL + "api/reservations/" + reservationID, {
+            method: "GET",
+            headers: {
+                "Session-Token": token
+            }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Reservation not found");
+                return res.json();
+            })
+            .then(reservation => {
+                // Store the full reservation data for later use (e.g., adding rooms)
+                currentViewReservation = reservation;
+
+                // ===== Populate Guest Info =====
+                const guest = reservation.guest || {};
+                document.getElementById("viewNic").innerText = guest.NIC || "-";
+                document.getElementById("viewName").innerText = guest.fullName || "-";
+                document.getElementById("viewContact").innerText = guest.contactNumber || "-";
+                document.getElementById("viewEmail").innerText = guest.email || "-";
+
+                // ===== Reservation Dates =====
+                const checkIn = reservation.checkInDate || "-";
+                const checkOut = reservation.checkOutDate || "-";
+                document.getElementById("viewCheckIn").innerText = checkIn;
+                document.getElementById("viewCheckOut").innerText = checkOut;
+
+                const nights = (checkIn !== "-" && checkOut !== "-")
+                    ? Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24))
+                    : 0;
+
+                document.getElementById("viewNights").innerText = nights;
+                document.getElementById("viewGuestCount").innerText = reservation.numberOfGuests || 1;
+                document.getElementById("viewStatus").innerText = reservation.status || "-";
+
+                // ===== Conditionally show "Add Room" button (only for 'booked' status) =====
+                const addRoomContainer = document.getElementById("addRoomContainer");
+                if (reservation.status === 'booked') {
+                    addRoomContainer.style.display = 'block';
+                } else {
+                    addRoomContainer.style.display = 'none';
+                }
+                // Also hide any open room grid when reopening modal
+                hideAddRoomGrid();
+
+                // ===== Room Breakdown =====
+                const tbody = document.getElementById("viewRoomBreakdown");
+                tbody.innerHTML = "";
+                let totalAmount = 0;
+
+                const roomList = reservation.roomAllocationList || [];
+                if (roomList.length > 0) {
+                    roomList.forEach(allocation => {
+                        const room = allocation.room || {};
+                        const roomId = room.roomID || "-";
+                        const roomType = room.roomTypeOB || {};  // adjust if property name differs
+                        const rate = roomType.chargePerNight || room.rate || 0;
+                        const roomTotal = rate * nights;
+                        totalAmount += roomTotal;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="text-align:left;">Room ${roomId}</td>
+                                <td style="text-align:left;">${roomType.typeName || 'Unknown'}</td>
+                                <td style="text-align:right;">LKR ${rate}</td>
+                                <td style="text-align:right;">LKR ${roomTotal}</td>
+                                <td style="text-align:center;">
+                                    <button class="btn btn-danger btn-sm" onclick="removeRoomFromReservation(${allocation.AllocationID}, ${reservationID})">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No rooms allocated</td></tr>';
+                }
+
+                document.getElementById("viewAmount").innerText = `LKR ${totalAmount.toLocaleString()}`;
+
+                // ===== Show Modal =====
+                document.getElementById("viewReservationModal").classList.add("show");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to load reservation details");
+            });
+    }
+
+    function closeViewModal() {
+        document.getElementById("viewReservationModal").classList.remove("show");
+        currentViewReservationId = null;
+        currentViewReservation = null;
+    }
+
+    // Show the visual room grid for adding a room
+    function showAddRoomGrid() {
+        document.getElementById("showAddRoomBtn").style.display = 'none';
+        document.getElementById("addRoomGridContainer").style.display = 'block';
+        renderAvailableRoomsGrid();
+    }
+
+    function hideAddRoomGrid() {
+        document.getElementById("addRoomGridContainer").style.display = 'none';
+        document.getElementById("showAddRoomBtn").style.display = 'inline-block';
+    }
+
+    function renderAvailableRoomsGrid() {
+        const grid = document.getElementById("availableRoomsGrid");
+        grid.innerHTML = ''; // Clear
+
+        if (!currentViewReservation) return;
+
+        // Fetch all rooms and filter out already allocated ones
+        fetch(BaseUSL + "/api/rooms?available=true")
+            .then(res => res.json())
+            .then(rooms => {
+                // Get allocated room IDs from currentViewReservation
+                const allocatedRoomIds = (currentViewReservation.roomAllocationList || []).map(a => a.room?.roomID).filter(id => id);
+                const availableRooms = rooms.filter(r => !allocatedRoomIds.includes(r.roomID));
+
+                if (availableRooms.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; color:#666;">No available rooms to add.</p>';
+                    return;
+                }
+
+                availableRooms.forEach(room => {
+                    const typeObj = roomTypes.find(rt => rt.roomTypeID === room.roomType);
+                    const charge = typeObj?.chargePerNight || 0;
+                    const occupancy = room.occupancy || typeObj?.maxOccupancy || 2;
+
+                    const square = document.createElement("div");
+                    square.className = "room-square";
+                    square.setAttribute("data-room-id", room.roomID);
+
+                    square.innerHTML = `
+                        <div class="room-number">Room ${room.roomID}</div>
+                        <div class="room-price">LKR ${charge}</div>
+                        <div class="room-occupancy">Max ${occupancy} guests</div>
+                    `;
+
+                    square.onclick = function() {
+                        if (confirm(`Add Room ${room.roomID} to this reservation?`)) {
+                            addRoomToReservation(room.roomID);
+                        }
+                    };
+
+                    grid.appendChild(square);
+                });
+            })
+            .catch(err => {
+                console.error("Failed to load available rooms", err);
+                // Fallback to mock rooms if API fails
+                const allocatedRoomIds = (currentViewReservation.roomAllocationList || []).map(a => a.room?.roomID).filter(id => id);
+                const availableRooms = mockRooms.filter(r => !allocatedRoomIds.includes(r.roomID));
+
+                if (availableRooms.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; color:#666;">No available rooms to add.</p>';
+                    return;
+                }
+
+                availableRooms.forEach(room => {
+                    const typeObj = mockRoomTypes.find(rt => rt.roomTypeID === room.roomType);
+                    const charge = typeObj?.chargePerNight || 0;
+                    const occupancy = room.occupancy || typeObj?.maxOccupancy || 2;
+
+                    const square = document.createElement("div");
+                    square.className = "room-square";
+                    square.setAttribute("data-room-id", room.roomID);
+
+                    square.innerHTML = `
+                        <div class="room-number">Room ${room.roomID}</div>
+                        <div class="room-price">LKR ${charge}</div>
+                        <div class="room-occupancy">Max ${occupancy} guests</div>
+                    `;
+
+                    square.onclick = function() {
+                        if (confirm(`Add Room ${room.roomID} to this reservation?`)) {
+                            addRoomToReservation(room.roomID);
+                        }
+                    };
+
+                    grid.appendChild(square);
+                });
+            });
+    }
+
+    function addRoomToReservation(roomId) {
+        if (!currentViewReservationId) return;
+
+        const payload = {
+            reservationId: currentViewReservationId,
+            roomId: parseInt(roomId)
+        };
+
+        fetch(BaseUSL + "/api/room-allocation", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Session-Token": token
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Room added successfully");
+                    // Refresh reservation list and reopen modal
+                    fetchReservations().then(() => {
+                        viewReservation(currentViewReservationId);
+                    });
+                } else {
+                    alert("Failed to add room: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error adding room");
+            });
+    }
+
+    function removeRoomFromReservation(allocationId, reservationId) {
+        if (!allocationId) {
+            alert("Allocation ID missing");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to remove this room from the reservation?")) {
+            return;
+        }
+
+        fetch(`${BaseUSL}/api/room-allocation/${allocationId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Session-Token": token
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success === true) {
+                    alert(data.message || "Room allocation removed successfully");
+                    // Refresh reservation view
+                    fetchReservations().then(() => {
+                        viewReservation(reservationId);
+                    });
+                } else {
+                    alert("Failed: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(error => {
+                console.error("Delete Error:", error);
+                alert("Error removing room allocation");
+            });
+    }
+
+    function updateReservationStatus(reservationID, status) {
+        if (!confirm(`Are you sure you want to mark this reservation as ${status}?`)) {
+            return;
+        }
+
+        if (!reservationID) {
+            alert("Reservation ID missing!");
+            return;
+        }
+        let id=reservationID;
+
+        fetch(BaseUSL + 'api/reservations/update/status', {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: token,
+                iD: id,
+                status: status
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong!");
+            });
+    }
+
+    function deleteReservation(id){
+        if (confirm("Are you sure you want to delete this reservation?")) {
+            fetch(BaseUSL + "/api/reservations?token=" + token + "&reservationID=" + id,{
+                method:"DELETE"
+            }).then(()=>fetchReservations())
+                .catch(()=>{
+                    alert("Reservation deleted (test mode)");
+                    fetchReservations();
+                });
+        }
+    }
+
+    // For step review
+    function updateReviewSection() {
+        document.getElementById("reviewNic").innerText = document.getElementById("guestNic").value || "-";
+        document.getElementById("reviewName").innerText = document.getElementById("guestName").value || "-";
+        document.getElementById("reviewContact").innerText = document.getElementById("guestContact").value || "-";
+        document.getElementById("reviewEmail").innerText = document.getElementById("guestEmail").value || "-";
+
+        const checkIn = document.getElementById("checkIn").value;
+        const checkOut = document.getElementById("checkOut").value;
+        document.getElementById("reviewCheckIn").innerText = checkIn ? new Date(checkIn).toLocaleString() : "-";
+        document.getElementById("reviewCheckOut").innerText = checkOut ? new Date(checkOut).toLocaleString() : "-";
+        const nights = (checkIn && checkOut) ? Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000*60*60*24)) : 0;
+        document.getElementById("reviewNights").innerText = nights;
+        document.getElementById("reviewGuestCount").innerText = document.getElementById("numberOfGuests").value || "1";
+        document.getElementById("reviewStatus").innerText = document.getElementById("status").value;
+
+        const tbody = document.getElementById("reviewRoomBreakdown");
+        tbody.innerHTML = "";
+        let total = 0;
+        selectedRooms.forEach(room => {
+            const typeObj = roomTypes.find(rt => rt.roomTypeID === room.roomType);
+            const rate = typeObj?.chargePerNight || 0;
+            const roomTotal = rate * nights;
+            total += roomTotal;
+            tbody.innerHTML += `<tr>
+                <td style="text-align:left;">Room ${room.roomID}</td>
+                <td style="text-align:left;">${typeObj?.typeName || 'Unknown'}</td>
+                <td style="text-align:right;">LKR ${rate}</td>
+                <td style="text-align:right;">LKR ${roomTotal}</td>
+            </tr>`;
+        });
+        document.getElementById("reviewAmount").innerText = "LKR " + total.toLocaleString(undefined, {minimumFractionDigits:2});
+    }
+</script>
+
+</body>
+</html> 

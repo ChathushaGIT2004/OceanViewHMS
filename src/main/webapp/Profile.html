@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile | Hotel Admin</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="Css/Styles.css">
+    <style>
+        /* Additional custom styles that complement external CSS */
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--secondary-navy), var(--primary-teal));
+            border-radius: var(--border-radius-circle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: 600;
+            position: relative;
+            box-shadow: var(--shadow-md);
+        }
+
+        .profile-avatar i {
+            font-size: 50px;
+            opacity: 0.9;
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--success-green);
+            border-radius: var(--border-radius-circle);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: all 0.2s ease;
+        }
+
+        .avatar-edit:hover {
+            background: var(--success-green-dark);
+            transform: scale(1.05);
+        }
+
+        .profile-header-info h3 {
+            font-size: var(--font-size-xxl);
+            color: var(--secondary-navy);
+            margin-bottom: var(--space-xs);
+        }
+
+        .profile-header-info p {
+            color: var(--neutral-dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-header-info p i {
+            color: var(--success-green);
+            font-size: 10px;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: var(--space-md);
+            top: 38px;
+            cursor: pointer;
+            color: var(--neutral-gray);
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-teal);
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+
+        /* Form grid for profile layout */
+        .profile-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-lg) var(--space-xl);
+        }
+
+        @media (max-width: 640px) {
+            .profile-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Profile header card */
+        .profile-header-card {
+            background: var(--neutral-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+            flex-wrap: wrap;
+        }
+
+        /* Status badge for profile */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--border-radius-pill);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .status-badge.active {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .status-badge.inactive {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- SIDEBAR -->
+   <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 id="navUsername">Chathusha Dewmith</h3>
+            <p id="navRoleid">Receptionaist</p>
+        </div>
+         
+        <nav class="sidebar-nav" id="sidebarNav">
+            
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>My Profile</h2>
+            </div>
+            <div class="header-right">
+                <span id="navUsername">Loading...</span>
+                <i class="fas fa-user-circle fa-2x"></i>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <div class="page-content">
+            <!-- Dynamic Alert -->
+            <div id="alertMessage" class="alert" style="display: none;"></div>
+
+            <!-- Profile Header Card -->
+            <div class="profile-header-card">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                    <div class="avatar-edit" title="Change avatar" onclick="showAvatarOptions()">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                </div>
+                <div class="profile-header-info">
+                    <h3 id="displayName">Loading...</h3>
+                    <p>
+                        <i class="fas fa-circle"></i>
+                        <span id="displayRole">...</span>
+                        <span class="status-badge active" id="displayStatusBadge">
+                            <span class="status-dot available"></span>
+                            Active
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Personal Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-id-card"></i> Personal Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="profile-form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-hashtag"></i> User ID
+                            </label>
+                            <input type="text" id="userId" class="form-control" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i> Username
+                            </label>
+                            <input type="text" id="username" class="form-control" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user-tag"></i> Full Name
+                            </label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-briefcase"></i> Role
+                            </label>
+                            <input type="text" id="role" class="form-control" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-toggle-on"></i> Status
+                            </label>
+                            <select id="status" class="form-control">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-secondary" onclick="resetForm()">
+                        <i class="fas fa-undo-alt"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="saveProfile()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-lock"></i> Change Password</h3>
+                </div>
+                <div class="card-body">
+                    <div class="profile-form-grid">
+                        <div class="form-group password-field">
+                            <label class="form-label">
+                                <i class="fas fa-key"></i> New Password
+                            </label>
+                            <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                            <span class="password-toggle" onclick="togglePassword('newPassword')">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="form-group password-field">
+                            <label class="form-label">
+                                <i class="fas fa-check-circle"></i> Confirm Password
+                            </label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password">
+                            <span class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-success" onclick="updatePassword()">
+                        <i class="fas fa-sync-alt"></i> Update Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="Js/Config.js"></script>
+<script src="Js/FeatureManager.js"></script>
+<script src="Js/Navbar.js"> </script>
+
+<script>
+    const BaseUSL ="http://localhost:8080/Ocean-View-System/";
+    const token = sessionStorage.getItem("token");
+
+    // Redirect if not logged in
+    if (!token) {
+        alert("Please log in first.");
+        window.location.href = "Login.jsp";
+    }
+
+    window.onload = function() {
+        fetchUser();
+        updateNavbar();
+    };
+ 
+    function fetchUser() {
+        fetch(BaseUSL + "api/users/me", {
+            method: "GET",
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Session-Token': token
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to fetch user");
+            return res.json();
+        })
+        .then(user => {
+            populateForm(user);
+             
+            
+        })
+        .catch(err => {
+            console.error(err);
+            showAlert(err.message, "error");
+            
+            // Mock data for demo
+            const mockUser = {
+                userID: 1,
+                username: "john_admin",
+                fullName: "John Administrator",
+                email: "john@hotel.com",
+                role: "Administrator",
+                status: "active"
+            };
+            populateForm(mockUser);
+        });
+    }
+
+    function populateForm(user) {
+        document.getElementById("userId").value = user.userID || '';
+        document.getElementById("username").value = user.username || '';
+        document.getElementById("fullName").value = user.fullName || '';
+        document.getElementById("email").value = user.email || '';
+        document.getElementById("role").value = user.role || '';
+        document.getElementById("status").value = (user.status || 'active').toLowerCase();
+
+        // Update profile header
+        document.getElementById("displayName").innerText = user.fullName || 'User';
+        document.getElementById("displayRole").innerText = user.role || 'Staff';
+        
+        // Update status badge
+        const statusBadge = document.getElementById("displayStatusBadge");
+        const status = (user.status || 'active').toLowerCase();
+        statusBadge.className = `status-badge ${status}`;
+        statusBadge.innerHTML = `
+            <span class="status-dot ${status === 'active' ? 'available' : 'maintenance'}"></span>
+            ${status.charAt(0).toUpperCase() + status.slice(1)}
+        `;
+    }
+
+    function resetForm() {
+        fetchUser();
+        showAlert("Form reset to saved values", "info");
+    }
+
+    function saveProfile() {
+        const updatedUser = {
+            userID: parseInt(document.getElementById("userId").value),
+            username: document.getElementById("username").value,
+            fullName: document.getElementById("fullName").value,
+            email: document.getElementById("email").value,
+            role: document.getElementById("role").value,
+            status: document.getElementById("status").value
+        };
+
+        // Validate
+        if (!updatedUser.fullName || !updatedUser.email) {
+            showAlert("Full name and email are required", "error");
+            return;
+        }
+
+        fetch(BaseUSL + "api/users/" + updatedUser.userID, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+                "Session-Token": token
+            },
+            body: JSON.stringify(updatedUser)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success || data.message) {
+                showAlert("Profile updated successfully", "success");
+                // Update header
+                document.getElementById("displayName").innerText = updatedUser.fullName;
+                
+                // Update status badge
+                const statusBadge = document.getElementById("displayStatusBadge");
+                const status = updatedUser.status.toLowerCase();
+                statusBadge.className = `status-badge ${status}`;
+                statusBadge.innerHTML = `
+                    <span class="status-dot ${status === 'active' ? 'available' : 'maintenance'}"></span>
+                    ${status.charAt(0).toUpperCase() + status.slice(1)}
+                `;
+            } else {
+                showAlert("Update failed: " + (data.error || "Unknown error"), "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            // Mock success for demo
+            showAlert("Profile updated successfully (Demo Mode)", "success");
+            document.getElementById("displayName").innerText = updatedUser.fullName;
+        });
+    }
+
+    function updatePassword() {
+        const newPass = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+
+        if (!newPass || !confirmPass) {
+            showAlert("Both password fields are required", "error");
+            return;
+        }
+        
+        if (newPass !== confirmPass) {
+            showAlert("Passwords do not match", "error");
+            return;
+        }
+
+        if (newPass.length < 6) {
+            showAlert("Password must be at least 6 characters", "error");
+            return;
+        }
+
+        fetch(BaseUSL + "api/users/password", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token,
+                "Session-Token": token
+            },
+            body: JSON.stringify({ newPassword: newPass })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success || data.message) {
+                showAlert("Password changed successfully", "success");
+                document.getElementById("newPassword").value = "";
+                document.getElementById("confirmPassword").value = "";
+            } else {
+                showAlert(data.message || "Password update failed", "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            // Mock success for demo
+            showAlert("Password changed successfully (Demo Mode)", "success");
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmPassword").value = "";
+        });
+    }
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const type = field.getAttribute("type") === "password" ? "text" : "password";
+        field.setAttribute("type", type);
+        
+        // Toggle icon
+        const icon = event.currentTarget.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    // Avatar options (placeholder)
+    function showAvatarOptions() {
+        alert("Avatar change feature coming soon!");
+    }
+
+    // Alert helper
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById("alertMessage");
+        alertDiv.style.display = "flex";
+        alertDiv.className = "alert alert-" + type;
+        
+        let icon = 'fa-info-circle';
+        if (type === 'success') icon = 'fa-check-circle';
+        if (type === 'error') icon = 'fa-exclamation-circle';
+        if (type === 'warning') icon = 'fa-exclamation-triangle';
+        
+        alertDiv.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+
+        setTimeout(() => {
+            alertDiv.style.display = "none";
+        }, 4000);
+    }
+
+    // Sidebar toggle function
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('expanded');
+    }
+</script>
+
+</body>
+</html>

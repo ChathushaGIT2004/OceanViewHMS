@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooms Management · Hotel Admin</title>
+   <link rel="stylesheet" href="Css/Styles.css">
+   <style>
+        /* ===== SAME DESIGN AS RESERVATIONS PAGE ===== */
+         body{background:#f0f2f5;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;color:#333;margin:0;padding:0}
+         
+         
+        .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px}
+        .metric{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center}
+        .metric h2{margin:0}
+        .controls{display:flex;justify-content:space-between;margin-bottom:15px; flex-wrap: wrap; gap: 10px;}
+        input,select{padding:8px;border-radius:6px;border:1px solid #ccc}
+         
+         
+        
+         
+        .btn-info{background:#17a2b8;color:white}
+        .btn-close {background: transparent;border: none;font-size: 28px;line-height: 1;padding: 0;margin: 0;color: #666;cursor: pointer;}
+        .btn-close:hover{color:#000}
+  
+        .form-section{margin-top:10px;padding:15px;background:#f7f9fc;border-radius:10px;border:1px solid #e2e8f0}
+        .form-section h3{margin-top:0;color:#34495e;font-size:16px}
+        .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:15px}
+        .room-square{border:2px solid #dee2e6;border-radius:12px;padding:15px 5px;text-align:center;cursor:pointer;transition:all 0.2s ease;background:white}
+        .room-square:hover{border-color:#007bff;transform:translateY(-2px)}
+        .room-square.selected{background:#007bff;border-color:#0056b3;color:white}
+        .room-square .room-number{font-size:16px;font-weight:bold;margin-bottom:3px}
+        .room-square .room-type{font-size:12px;color:#666}
+        .room-square .room-status{font-size:12px;color:#28a745;font-weight:bold}
+
+          /* ===== TABS ===== */
+        
+        
+        .refresh-btn {
+            background: white;
+            border: 1px solid #cddde9;
+            border-radius: 30px;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .refresh-btn:hover { background: #e3f0f9; }
+        .section { display: block; }
+        .section.hidden { display: none; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #e1edf7;
+            color: #1c5777;
+        }
+
+        /* ===== REDESIGNED MODAL FORM STYLES ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        .form-field {
+            margin-bottom: 12px;
+        }
+        .form-field label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0ddee;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        .form-field input:focus,
+        .form-field select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+        }
+        .form-field .input-icon {
+            position: relative;
+        }
+        .form-field .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        .form-field .input-icon input {
+            padding-left: 36px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            border-top: 1px solid #e0e8f0;
+            padding-top: 20px;
+        }
+        .modal-actions .btn {
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            border-radius: 30px;
+        }
+        .modal-header h2 i {
+            color: #007bff;
+            margin-right: 8px;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 id="navUsername">Chathusha Dewmith</h3>
+            <p id="navRoleid">Receptionaist</p>
+        </div>
+         
+        <nav class="sidebar-nav" id="sidebarNav">
+            
+        </nav>
+    </aside>
+
+ 
+    <div class="main-content">
+        
+        <div class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h2>Rooms Management</h2>
+            </div>
+            <div class="header-right">
+                 <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                 
+            </div>
+            
+           
+        </div>
+        <div class="page-content"> 
+        <!-- METRICS -->
+        <div class="metrics">
+            <div class="metric"><h2 id="totalRooms">0</h2><p>Total Rooms</p></div>
+            <div class="metric"><h2 id="availableRoomsCount">0</h2><p>Available</p></div>
+            <div class="metric"><h2 id="occupiedRoomsCount">0</h2><p>Occupied</p></div>
+            <div class="metric"><h2 id="maintenanceRoomsCount">0</h2><p>Maintenance</p></div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" id="tabRooms">Rooms</button>
+            <button class="tab" id="tabRoomTypes">Room Types</button>
+        </div>
+
+        <!-- ROOMS SECTION -->
+        <div id="roomsSection" class="section">
+            <div class="controls">
+                <div id="AddRoomBtn" ><button class="btn btn-primary" onclick="openAddRoomModal()">+ Add Room</button></div>
+                <div>
+                    Search:
+                    <input type="text" id="searchInput" onkeyup="applyRoomFilters()" placeholder="number, type, status...">
+                </div>
+            </div>
+            <table id="roomsTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Room Number</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- ROOM TYPES SECTION -->
+        <div id="roomTypesSection" class="section hidden">
+            <div class="controls">
+                <div id="AddRoomTypeBtn"><button class="btn btn-primary" onclick="openAddRoomTypeModal()">+ Add Room Type</button></div>
+                <div></div>
+            </div>
+            <table id="roomTypesTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type Name</th>
+                    <th>Charge/Night</th>
+                    <th>Occupancy Limit</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+ 
+<!-- ===== REDESIGNED ADD/EDIT ROOM MODAL ===== -->
+<div id="roomModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle"><i class="fas fa-door-open"></i> <span>Add Room</span></h2>
+            <button class="btn-close" onclick="closeRoomModal()">&times;</button>
+        </div>
+        <div class="form-section">
+            <div class="form-grid">
+                <!-- Room Number -->
+                <div class="form-field full-width">
+                    <label><i class="fas fa-hashtag" style="margin-right:4px;"></i> Room Number</label>
+                    <input type="text" id="roomNumber" placeholder="e.g. 101, 202A">
+                </div>
+
+                <!-- Room Type -->
+                <div class="form-field full-width">
+                    <label><i class="fas fa-tag"></i> Room Type</label>
+                    <select id="roomTypeSelect">
+                        <!-- options populated by JS -->
+                    </select>
+                </div>
+
+                <!-- Status -->
+                <div class="form-field full-width">
+                    <label><i class="fas fa-circle"></i> Status</label>
+                    <select id="roomStatusSelect">
+                        <option value="Available">Available</option>
+                        <option value="Occupied">Occupied</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRoomModal()">Cancel</button>
+                <button class="btn btn-success" id="Saveroombtn" onclick="saveRoom()">Save Room</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== REDESIGNED ADD/EDIT ROOM TYPE MODAL ===== -->
+<div id="roomTypeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="roomTypeModalTitle"><i class="fas fa-list-alt"></i> <span>Add Room Type</span></h2>
+            <button class="btn-close" onclick="closeRoomTypeModal()">&times;</button>
+        </div>
+        <div class="form-section">
+            <div class="form-grid">
+                <!-- Room Type ID -->
+                <div class="form-field">
+                    <label><i class="fas fa-id-card"></i> Type ID</label>
+                    <input type="number" id="roomTypeIdInput" placeholder="e.g. 4">
+                </div>
+
+                <!-- Type Name -->
+                <div class="form-field">
+                    <label><i class="fas fa-font"></i> Type Name</label>
+                    <input type="text" id="roomTypeNameInput" placeholder="e.g. Deluxe">
+                </div>
+
+                <!-- Charge Per Night -->
+                <div class="form-field">
+                    <label><i class="fas fa-money-bill-wave"></i> Charge/Night (LKR)</label>
+                    <input type="number" step="0.01" id="roomTypeChargeInput" placeholder="5000">
+                </div>
+
+                <!-- Occupancy Limit -->
+                <div class="form-field">
+                    <label><i class="fas fa-users"></i> Occupancy Limit</label>
+                    <input type="number" id="roomTypeOccupancyInput" placeholder="2">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRoomTypeModal()">Cancel</button>
+                <button class="btn btn-success" onclick="saveRoomType()">Save Type</button>
+            </div>
+            <p style="font-size:0.8rem; margin-top:12px; color:#6c7a89;"><i class="fas fa-info-circle"></i> For new types, provide a unique ID (server requires it).</p>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="Js/Config.js"></script>
+<script src="Js/FeatureManager.js"></script>
+<script src="Js/Navbar.js"></script>
+
+<script>
+    // ----- EXISTING VARIABLES AND FUNCTIONS (UNCHANGED) -----
+    let rooms = [];
+    let roomTypes = [];
+    let editingRoomId = null;
+    let editingRoomTypeId = null;
+
+    const BASE_URL = 'http://localhost:8080/Ocean-View-System/';   // BaseIRL unchanged
+    
+    const token= sessionStorage.getItem('token');
+    console.log('Token in Rooms.js:', token);
+
+    // ==== Fetch Room Types ====
+    function loadRoomTypes(){
+        fetch(BASE_URL+'api/roomtypes')
+            .then(res => res.json())
+            .then(data => {
+                roomTypes = data;
+                let select = document.getElementById('roomTypeSelect');
+                if (select) {
+                    select.innerHTML = '';
+                    data.forEach(rt => {
+                        let opt = document.createElement('option');
+                        opt.value = rt.roomTypeID;
+                        opt.textContent = rt.typeName;
+                        select.appendChild(opt);
+                    });
+                }
+                renderRoomTypesTable();
+            })
+            .catch(err => {
+                console.warn('Error loading room types, using mock', err);
+                roomTypes = [
+                    { roomTypeID: 1, typeName: 'Standard', chargePerNight: 5000, occupancyLimit: 2 },
+                    { roomTypeID: 2, typeName: 'Deluxe', chargePerNight: 8000, occupancyLimit: 3 },
+                    { roomTypeID: 3, typeName: 'Suite', chargePerNight: 12000, occupancyLimit: 4 }
+                ];
+                renderRoomTypesTable();
+            });
+    }
+
+    // ==== Fetch Rooms ====
+    function loadRooms(){
+        fetch(BASE_URL+'api/rooms')
+            .then(res => res.json())
+            .then(data => {
+                rooms = data;
+                renderRoomsTable();
+                updateMetrics();
+                applyRoomFilters();
+            })
+            .catch(err => {
+                console.warn('Error loading rooms, using mock', err);
+                rooms = [
+                    { roomID: 101, roomNumber: '101', roomType: 1, roomStatus: 'Available' },
+                    { roomID: 102, roomNumber: '102', roomType: 1, roomStatus: 'Occupied' },
+                    { roomID: 103, roomNumber: '103', roomType: 2, roomStatus: 'Available' }
+                ];
+                renderRoomsTable();
+                updateMetrics();
+            });
+    }
+
+    // ==== Render Rooms Table ====
+  function renderRoomsTable() {
+    let tbody = document.querySelector('#roomsTable tbody');
+    tbody.innerHTML = '';
+
+    rooms.forEach(r => {
+        console.log('Rendering room:', r);
+        let tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td>${r.roomID}</td>
+            <td>${r.roomNumber || r.roomID}</td>
+            <td>${getRoomTypeName(r.roomType)}</td>
+            <td><span class="status-badge">${r.roomStatus}</span></td>
+            <td>
+                <div class="room-edit-btn">
+                    <button class="btn" onclick="editRoom(${r.roomID})">Edit</button>
+                </div>
+                <div class="room-delete-btn">
+                    <button class="btn" onclick="deleteRoom(${r.roomID})">Delete</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Toggle visibility based on permissions
+        if (!hasFeature('UPDATE_ROOM')){
+              
+            let editDiv = tr.querySelector('.room-edit-btn');
+             
+            if(editDiv) editDiv.style.visibility = 'hidden';
+            
+        }
+
+        if (!hasFeature('DELETE_ROOM')){
+               
+            let deleteDiv = tr.querySelector('.room-delete-btn');
+            
+            if(deleteDiv) deleteDiv.style.visibility = 'hidden';
+        }
+    });
+}
+    // ==== Render Room Types Table ====
+    function renderRoomTypesTable(){
+        let tbody = document.querySelector('#roomTypesTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        roomTypes.forEach(rt => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${rt.roomTypeID}</td>
+                <td><strong>${rt.typeName}</strong></td>
+                <td>LKR ${rt.chargePerNight}</td>
+                <td>${rt.occupancyLimit}</td>
+                <td>
+                    <button class="btn btn-success" onclick="editRoomType(${rt.roomTypeID})">Edit</button>
+                    <button class="btn btn-danger" onclick="deleteRoomType(${rt.roomTypeID})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ==== Get Room Type Name ====
+    function getRoomTypeName(id){
+        let rt = roomTypes.find(t => t.roomTypeID == id);
+        return rt ? rt.typeName : 'Unknown';
+    }
+
+    // ==== Open Add/Edit Room Modal ====
+    function openAddRoomModal(){
+        editingRoomId = null;
+        document.getElementById('modalTitle').querySelector('span').textContent = 'Add Room';
+        document.getElementById('roomNumber').value = '';
+        document.getElementById('roomStatusSelect').value = 'Available';
+        document.getElementById('roomModal').classList.add('show');
+      //  document.getElementById('Saveroombtn').onclick = () => saveRoom('POST'); // Set to create mode
+    }
+
+    function editRoom(id){
+        editingRoomId = id;
+        document.getElementById('modalTitle').querySelector('span').textContent = 'Edit Room';
+        let room = rooms.find(r => r.roomID == id);
+        document.getElementById('roomNumber').value = room.roomID || '';
+        document.getElementById('roomStatusSelect').value = room.roomStatus;
+        document.getElementById('roomTypeSelect').value = room.roomType;
+        document.getElementById('roomModal').classList.add('show');
+        //document.getElementById('Saveroombtn').onclick = () => saveRoom('PUT'); // Set to update mode
+    }
+
+    function closeRoomModal(){
+        document.getElementById('roomModal').classList.remove('show');
+    }
+
+    // ==== Save Room ====
+     function saveRoom() {
+
+    let roomID = editingRoomId;
+    let roomType = document.getElementById('roomTypeSelect').value;
+    let roomStatus = document.getElementById('roomStatusSelect').value;
+
+    let url = BASE_URL + 'api/rooms';
+    let method = editingRoomId ? 'PUT' : 'POST';
+
+    
+    let params = new URLSearchParams();
+    if (editingRoomId) {
+        params.append("roomID", roomID);
+    }
+    params.append("roomType", roomType);
+    params.append("roomStatus", roomStatus);
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': token    
+        },
+        body: params.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        closeRoomModal();
+        loadRooms();
+    })
+    .catch(err => {
+        console.error("Error:", err);
+    });
+}
+    // ==== Delete Room ====
+    function deleteRoom(id){
+    if (!confirm('Are you sure to delete this room?')) return;
+
+    fetch(BASE_URL + 'api/rooms?roomID=' + id, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': token
+        }
+    })
+    .then(res => res.json())
+    .then(() => loadRooms())
+    .catch(() => {
+        rooms = rooms.filter(r => r.roomID != id);
+        renderRoomsTable();
+        updateMetrics();
+    });
+}
+
+    // ==== Update Metrics ====
+    function updateMetrics(){
+        document.getElementById('totalRooms').textContent = rooms.length;
+        document.getElementById('availableRoomsCount').textContent = rooms.filter(r => r.roomStatus === 'Available').length;
+        document.getElementById('occupiedRoomsCount').textContent = rooms.filter(r => r.roomStatus === 'Occupied').length;
+        document.getElementById('maintenanceRoomsCount').textContent = rooms.filter(r => r.roomStatus === 'Maintenance').length;
+    }
+
+    // ==== Search Filter ====
+    function applyRoomFilters(){
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = rooms.filter(r =>
+            (r.roomNumber?.toString().toLowerCase().includes(query)) ||
+            getRoomTypeName(r.roomType).toLowerCase().includes(query) ||
+            r.roomStatus.toLowerCase().includes(query)
+        );
+        let tbody = document.querySelector('#roomsTable tbody');
+        tbody.innerHTML = '';
+        filtered.forEach(r => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td>${r.roomID}</td>
+            <td>${r.roomNumber || r.roomID}</td>
+            <td>${getRoomTypeName(r.roomType)}</td>
+            <td><span class="status-badge">${r.roomStatus}</span></td>
+            <td>
+                <div class="room-edit-btn">
+                    <button class="btn" onclick="editRoom(${r.roomID})">Edit</button>
+                </div>
+                <div class="room-delete-btn">
+                    <button class="btn" onclick="deleteRoom(${r.roomID})">Delete</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Toggle visibility based on permissions
+        if (!hasFeature('UPDATE_ROOM')){
+              
+            let editDiv = tr.querySelector('.room-edit-btn');
+           
+            if(editDiv) editDiv.style.visibility = 'hidden';
+            
+        }
+
+        if (!hasFeature('DELETE_ROOM')){
+                
+            let deleteDiv = tr.querySelector('.room-delete-btn');
+         
+            if(deleteDiv) deleteDiv.style.visibility = 'hidden';
+        }
+        });
+
+    }
+
+    // ========== ROOM TYPE CRUD ==========
+    function openAddRoomTypeModal(){
+        editingRoomTypeId = null;
+        document.getElementById('roomTypeModalTitle').querySelector('span').textContent = 'Add Room Type';
+        document.getElementById('roomTypeIdInput').value = '';
+        document.getElementById('roomTypeNameInput').value = '';
+        document.getElementById('roomTypeChargeInput').value = '';
+        document.getElementById('roomTypeOccupancyInput').value = '';
+        document.getElementById('roomTypeModal').classList.add('show');
+    }
+
+    function editRoomType(id){
+        editingRoomTypeId = id;
+        document.getElementById('roomTypeModalTitle').querySelector('span').textContent = 'Edit Room Type';
+        let rt = roomTypes.find(t => t.roomTypeID == id);
+        if (rt) {
+            document.getElementById('roomTypeIdInput').value = rt.roomTypeID;
+            document.getElementById('roomTypeNameInput').value = rt.typeName;
+            document.getElementById('roomTypeChargeInput').value = rt.chargePerNight;
+            document.getElementById('roomTypeOccupancyInput').value = rt.occupancyLimit;
+        }
+        document.getElementById('roomTypeModal').classList.add('show');
+    }
+
+    function closeRoomTypeModal(){
+        document.getElementById('roomTypeModal').classList.remove('show');
+    }
+
+    function saveRoomType(){
+        let roomTypeId = parseInt(document.getElementById('roomTypeIdInput').value);
+        let typeName = document.getElementById('roomTypeNameInput').value.trim();
+        let charge = parseFloat(document.getElementById('roomTypeChargeInput').value);
+        let occupancy = parseInt(document.getElementById('roomTypeOccupancyInput').value);
+
+        if (!roomTypeId || !typeName || isNaN(charge) || isNaN(occupancy)) {
+            alert('Please fill all fields correctly.');
+            return;
+        }
+
+        let params = new URLSearchParams();
+        params.append('roomTypeID', roomTypeId);
+        params.append('typeName', typeName);
+        params.append('chargePerNight', charge);
+        params.append('occupancyLimit', occupancy);
+
+        let url = BASE_URL + 'api/roomtypes';
+        let method = editingRoomTypeId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        })
+            .then(res => res.json())
+            .then(data => {
+                closeRoomTypeModal();
+                loadRoomTypes();
+            })
+            .catch(err => {
+                console.warn('Error saving room type, using mock update', err);
+                if (editingRoomTypeId) {
+                    let index = roomTypes.findIndex(t => t.roomTypeID == editingRoomTypeId);
+                    if (index !== -1) {
+                        roomTypes[index] = { roomTypeID: roomTypeId, typeName, chargePerNight: charge, occupancyLimit: occupancy };
+                    }
+                } else {
+                    roomTypes.push({ roomTypeID: roomTypeId, typeName, chargePerNight: charge, occupancyLimit: occupancy });
+                }
+                closeRoomTypeModal();
+                renderRoomTypesTable();
+                let select = document.getElementById('roomTypeSelect');
+                if (select) {
+                    select.innerHTML = '';
+                    roomTypes.forEach(rt => {
+                        let opt = document.createElement('option');
+                        opt.value = rt.roomTypeID;
+                        opt.textContent = rt.typeName;
+                        select.appendChild(opt);
+                    });
+                }
+            });
+    }
+
+    function deleteRoomType(id){
+        if (!confirm('Delete this room type? It may affect existing rooms.')) return;
+        fetch(BASE_URL + 'api/roomtypes?roomTypeID=' + id, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(() => {
+                loadRoomTypes();
+            })
+            .catch(() => {
+                roomTypes = roomTypes.filter(t => t.roomTypeID != id);
+                renderRoomTypesTable();
+            });
+    }
+
+    // ===== Tabs & Refresh =====
+    function initTabs() {
+        const tabRooms = document.getElementById('tabRooms');
+        const tabRoomTypes = document.getElementById('tabRoomTypes');
+        const roomsSection = document.getElementById('roomsSection');
+        const typesSection = document.getElementById('roomTypesSection');
+
+        tabRooms.addEventListener('click', function() {
+            tabRooms.classList.add('active');
+            tabRoomTypes.classList.remove('active');
+            roomsSection.classList.remove('hidden');
+            typesSection.classList.add('hidden');
+        });
+
+        tabRoomTypes.addEventListener('click', function() {
+            tabRoomTypes.classList.add('active');
+            tabRooms.classList.remove('active');
+            roomsSection.classList.add('hidden');
+            typesSection.classList.remove('hidden');
+            renderRoomTypesTable();
+        });
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        loadRooms();
+        loadRoomTypes();
+    });
+
+
+     function initcontent(){
+        AddRoomBtn=document.getElementById("AddRoomBtn");3
+        AddRoomTypeBtn=document.getElementById("AddRoomTypeBtn");
+
+        if(hasFeature('CREATE_ROOM')){
+            AddRoomBtn.style.display = 'block';
+
+     }
+     else {
+            AddRoomBtn.style.display = 'none';
+        }
+        if(hasFeature('CREATE_ROOM_TYPE')){
+            AddRoomTypeBtn.style.display = 'block';
+
+     }
+        else {
+                AddRoomTypeBtn.style.display = 'none';
+            }
+     }        
+
+    // ===== INIT =====
+    initcontent();
+    loadRoomTypes();
+    loadRooms();
+    initTabs();
+</script>
+</body>
+</html>

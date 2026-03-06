@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Dashboard • Ocean View Hotel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   <link rel="stylesheet" href="Css/Styles.css">
+   <style>
+        
+ 
+
+        /* CTA buttons */
+        .cta-section {
+            margin-top: 35px;
+        }
+
+        .cta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .cta-btn {
+            background: var(--secondary-navy-light);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: .2s;
+            border: none;
+            font-size: 1rem;
+        }
+        .cta-btn:hover {
+            background: var(--secondary-navy-dark);
+        }
+        .cta-btn i {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+ 
+ 
+    </style>
+</head>
+<body>
+    <Script src="Js/Config.js"></Script>
+    <script src="Js/FeatureManager.js"> </script>
+    <script src="Js/Navbar.js"></script>
+
+<div class="app-content">
+    
+   <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3 id="navUsername">Chathusha Dewmith</h3>
+            <p id="navRoleid">Receptionaist</p>
+        </div>
+         
+        <nav class="sidebar-nav" id="sidebarNav">
+            
+        </nav>
+    </aside>
+
+    
+    <div class="main-content">
+       
+        <div class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h2>Ocean View Hotel Management</h2>
+            </div>
+             
+            
+           
+        </div>
+
+
+
+     <div class="page-content">     
+        <div class="stats-grid">
+             <div class="stat-card" id="cardTotalReservation">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Reservations</h3>
+                        <div class="stat-value"id="totalReservations">0</div>
+                    </div>
+                </div>
+            
+                <div class="stat-card"  id="cardActiveReservation">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Active Reservations</h3>
+                        <div class="stat-value"id="activeReservations">0</div>
+                    </div>
+                </div>
+                <div class="stat-card" id="cardPaidBills">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Paid Bills</h3>
+                        <div class="stat-value"id="paidBills">0</div>
+                    </div>
+                </div>
+                <div class="stat-card" id="cardPendingBills">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Pending Bills</h3>
+                        <div class="stat-value"id="pendingBills">0</div>
+                    </div>
+                </div>
+                
+
+               
+             
+             
+             
+        </div>
+
+        
+        <div class="cta-section" >
+            <h3>Quick Actions</h3>
+            <div class="cta-grid">
+                <div class="cta-btn"  id="ctaCreateReservation" onclick="window.location.href='Reservation.html'">
+                    <i class="fas fa-calendar-plus"></i><br>Create Reservation
+                </div>
+                <div class="cta-btn" id="ctaViewGuests" onclick="window.location.href='Guest.html'">
+                    <i class="fas fa-user-friends"></i><br>View Guests
+                </div>
+                <div class="cta-btn" id="ctaManageRooms" onclick="window.location.href='Rooms.html'">
+                    <i class="fas fa-bed"></i><br>Manage Rooms
+                </div>
+                <div class="cta-btn" id="ctaBilling" onclick="window.location.href='Billing.html'">
+                    <i class="fas fa-file-invoice-dollar"></i><br>Billing
+                </div>
+            </div>
+        </div>
+
+        
+    </div>    
+    </div>
+</div>
+
+<!-- ========== ORIGINAL SCRIPT (FETCH METHODS, VARIABLES UNTOUCHED) ========== -->
+<script>
+    const BaseUSL = "http://localhost:8080/Ocean-View-System";   // original variable kept
+    const token = sessionStorage.getItem("token");
+
+    let allGuests=[], allReservations=[], allBillings=[];
+    let allRooms=[], selectedRooms=[], roomTypes=[];
+
+    // -------------------- ON LOAD --------------------
+    window.onload = async function(){
+        
+        await fetchReservations();
+        await loadBillings();
+        await fetchRoomTypes();
+        await fetchAvailableRooms();
+    };
+
+  
+    
+     
+
+    // -------------------- FETCH RESERVATIONS --------------------
+    async function fetchReservations(){
+        try{
+            const res = await fetch(`${BaseUSL}/api/reservations`);
+            allReservations = await res.json();
+            updateDashboardMetrics();
+        }catch(e){console.error(e);}
+    }
+
+    // -------------------- FETCH BILLINGS --------------------
+    async function loadBillings(){
+        try{
+            const res = await fetch(`${BaseUSL}/api/billing/all`);
+            allBillings = await res.json();
+            updateDashboardMetrics();
+        }catch(e){console.error(e);}
+    }
+
+    // -------------------- UPDATE DASHBOARD METRICS --------------------
+    function updateDashboardMetrics(){
+        
+        document.getElementById("totalReservations").innerText = allReservations.length;
+        document.getElementById("activeReservations").innerText = allReservations.filter(r=>r.status==="Confirmed"||r.status==="CheckedIn").length;
+        document.getElementById("paidBills").innerText = allBillings.filter(b=>b.paymentStatus==="Paid").length;
+        document.getElementById("pendingBills").innerText = allBillings.filter(b=>b.paymentStatus!=="Paid").length;
+    }
+
+    
+
+    async function fetchAvailableRooms(){
+        try{
+            const res = await fetch(`${BaseUSL}/api/rooms?available=true`);
+            allRooms = await res.json();
+        }catch(e){allRooms=[];}
+        filterRooms();
+    }
+
+    window.onload = async function () {
+     
+   
+
+    if (hasFeature("VIEW_RESERVATIONS")) {
+        await fetchReservations();
+    }
+
+    if (hasFeature("VIEW_BILLING")) {
+        await loadBillings();
+    }
+
+    if (hasFeature("VIEW_ROOMS")) {
+        await fetchRoomTypes();
+        await fetchAvailableRooms();
+    }
+
+    InitializeDashboardComponents();
+};
+ 
+function InitializeDashboardComponents() {
+     
+    const card = {
+        allReservations: document.getElementById("cardTotalReservation"),
+        activeReservations: document.getElementById("cardActiveReservation"),
+        paidBills: document.getElementById("cardPaidBills"),
+        pendingBills: document.getElementById("cardPendingBills")
+    };
+
+    const cta = {
+        createReservation: document.getElementById("ctaCreateReservation"),
+        viewGuests: document.getElementById("ctaViewGuests"),
+        manageRooms: document.getElementById("ctaManageRooms"),
+        billing: document.getElementById("ctaBilling")
+    };
+
+    // -------------------- CTA Buttons --------------------
+    if (!hasFeature("CREATE_RESERVATION")) cta.createReservation.style.display = "none";
+    if (!hasFeature("VIEW_GUESTS")) cta.viewGuests.style.display = "none";
+    if (!hasFeature("CREATE_ROOM") && !hasFeature("UPDATE_ROOM") && !hasFeature("DELETE_ROOM")) cta.manageRooms.style.display = "none";
+    if (!hasFeature("CREATE_BILLING") && !hasFeature("VIEW_BILLING")) cta.billing.style.display = "none";
+
+    // -------------------- Metrics --------------------
+    if (!hasFeature("VIEW_RESERVATIONS")) {
+        card.allReservations.style.display = "none";
+        card.activeReservations.style.display = "none";
+    }
+    if (!hasFeature("VIEW_BILLING")) {
+        card.paidBills.style.display = "none";
+        card.pendingBills.style.display = "none";
+    }
+    if(!hasFeature("ACESS_GUEST_PAGE")){
+       cta.viewGuests.style.display = "none";
+
+       {}
+}
+}      
+    
+     
+
+     
+</script>
+
+</body>
+</html>
