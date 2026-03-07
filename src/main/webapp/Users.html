@@ -656,10 +656,7 @@
                     <input type="email" id="newEmail" required>
                 </div>
 
-                <div class="form-group-custom">
-                    <label><i class="fas fa-lock"></i> Password *</label>
-                    <input type="password" id="newPassword" required>
-                </div>
+                 
 
                 <div class="form-row-custom">
                     <div class="form-group-custom">
@@ -755,6 +752,7 @@
     function getAuthToken() {
         return sessionStorage.getItem('token') ;
     }
+    console.log('Auth Token:', getAuthToken());
 
     
     document.addEventListener('DOMContentLoaded', function() {

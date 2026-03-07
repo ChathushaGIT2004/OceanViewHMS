@@ -26,9 +26,9 @@ public class AuthController extends HttpServlet {
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        String role = request.getParameter("role");
 
-        Map<String, Object> result = authService.login(username, password, role);
+
+        Map<String, Object> result = authService.login(username, password);
 
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();

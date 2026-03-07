@@ -28,7 +28,7 @@ public class AuthService {
     /**
      * Logs in the user and creates a session using SessionManager
      */
-    public Map<String, Object> login(String username, String password, String role) {
+    public Map<String, Object> login(String username, String password) {
         Map<String, Object> result = new HashMap<>();
         boolean success = false;
         String message = "";
@@ -41,7 +41,7 @@ public class AuthService {
 
         if (user != null) {
             if (user.getPasswordHash().equals(hashPassword( password))) {
-                if (user.getRole().equalsIgnoreCase(role)) {
+
                     success = true;
                     message = "Login successful";
 
@@ -49,9 +49,7 @@ public class AuthService {
                     token = SessionManager.createSession(user.getUserID(),user.getRole());
                     System.out.println("Authservise session token"+token);
 
-                } else {
-                    message = "Login failed - Incorrect role";
-                }
+
             } else {
                 message = "Login failed - Invalid password";
             }

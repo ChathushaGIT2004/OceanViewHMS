@@ -68,8 +68,16 @@ public class UserService {
             user.setStatus(dto.getStatus());
 
             //generate randlom Password
-            String ranPass = generateRandomPassword(5);
+            System.out.println("user Password generation");
+            String ranPass = generateRandomPassword(7);
 
+
+
+
+            user.setPasswordHash(hashPassword(ranPass));
+
+            // Save user
+            userDAO.save(user);
 
             String subject = "Job Offer";
             String body = String.format(
@@ -87,13 +95,8 @@ public class UserService {
                     ranPass
             );
 
+
             emailUtil.sendPlainTextEmail(user.getEmail(), subject, body);
-
-            user.setPasswordHash(hashPassword(ranPass));
-
-            // Save user
-            userDAO.save(user);
-
 
 
             // Return success message

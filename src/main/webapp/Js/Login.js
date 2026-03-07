@@ -42,7 +42,7 @@ clearAuthData() ;
 
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
-            const role = document.getElementById("role").value;
+             
 
             errorDiv.textContent = ""; // clear previous errors
 
@@ -50,7 +50,7 @@ clearAuthData() ;
                 const formData = new URLSearchParams();
                 formData.append("username", username);
                 formData.append("password", password);
-                formData.append("role", role);
+               
 
                 // 🔥 Updated endpoint for AuthController
                 const response = await fetch("api/auth", {
