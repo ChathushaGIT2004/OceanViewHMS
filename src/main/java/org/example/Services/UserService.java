@@ -3,20 +3,27 @@ package org.example.Services;
 import org.example.DTO.ResponseMessageDTO;
 import org.example.DTO.UserDTO;
 import org.example.Models.User.User;
+import org.example.Util.EmailUtil;
+import org.example.Util.PasswordUtil;
 import org.example.Util.SessionManager;
 import org.example.dao.UserDAO;
 import org.example.dao.impl.UserDAOImpl;
+
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.example.Util.PasswordUtil.generateRandomPassword;
 import static org.example.Util.PasswordUtil.hashPassword;
 
 public class UserService {
 
     private final UserDAO userDAO = new UserDAOImpl();
+    private final EmailUtil emailUtil=new EmailUtil();
+    private final PasswordUtil passwordUtil=new PasswordUtil();
+
 
     // =============================
     // BASIC CRUD
@@ -60,8 +67,34 @@ public class UserService {
             user.setEmail(dto.getEmail());
             user.setStatus(dto.getStatus());
 
+            //generate randlom Password
+            String ranPass = generateRandomPassword(5);
+
+
+            String subject = "Job Offer";
+            String body = String.format(
+                    "Dear %s,\n\n" +
+                            "Congratulations! You have been appointed as our new %s.\n\n" +
+                            "Please find your login details below:\n" +
+                            "Username: %s\n" +
+                            "Password: %s\n\n" +
+                            "We look forward to working with you.\n\n" +
+                            "Best regards,\n" +
+                            "Ocean View HMS",
+                    user.getFullName(),
+                    user.getRole(),
+                    user.getUsername(),
+                    ranPass
+            );
+
+            emailUtil.sendPlainTextEmail(user.getEmail(), subject, body);
+
+            user.setPasswordHash(hashPassword(ranPass));
+
             // Save user
             userDAO.save(user);
+
+
 
             // Return success message
             return new ResponseMessageDTO(true, "User created successfully");
