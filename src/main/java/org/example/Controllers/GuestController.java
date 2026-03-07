@@ -59,7 +59,15 @@ public class GuestController extends HttpServlet {
             out.print("[");
             for (int i = 0; i < allGuests.size(); i++) {
                 Guest g = allGuests.get(i);
-                out.print("{\"id\":" + g.getGuestID() + ",\"name\":\"" + g.getFullName() + "\"}"
+                out.print("{"
+                        + "\"found\":true,"
+                        + "\"id\":" + g.getGuestID() + ","
+                        + "\"name\":\"" + g.getFullName() + "\","
+                        + "\"contact\":\"" + g.getContactNumber() + "\","
+                        + "\"email\":\"" + g.getEmail() + "\","
+                        + "\"nic\":\"" + g.getNIC() + "\""
+
+                        + "}"
                         + (i < allGuests.size() - 1 ? "," : ""));
             }
             out.print("]");

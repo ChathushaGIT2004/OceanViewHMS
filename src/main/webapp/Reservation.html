@@ -1189,7 +1189,7 @@ canvas {
         tbody.innerHTML = "";
 
         data.forEach(res => {
-            console.log(res)
+            
             // Fix property names based on backend response
             const reservationID = res.ReservationID;
             const guestName = res.guestFullname || "-";
@@ -1411,7 +1411,7 @@ canvas {
             .then(res=>res.json())
             .then(data=>{
                 if(data.found){
-                    console.log(data.id);
+                   
                     document.getElementById("guestName").value=data.name;
                     document.getElementById("guestContact").value=data.contact;
                     document.getElementById("guestEmail").value=data.email;
@@ -1664,7 +1664,7 @@ canvas {
             roomIds: selectedRooms.map(r => r.roomID)
         };
 
-        console.log(reservationDTO);
+       
 
         fetch(BaseUSL + "/api/reservations", {
             method: "POST",

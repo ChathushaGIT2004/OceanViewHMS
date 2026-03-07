@@ -1,10 +1,28 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" /><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Hotel System Login</title>
     <link rel="stylesheet" href="Css/Styles.css">
+    <style>
+ 
+.spinner {
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #ddd;
+    border-top: 4px solid var(--primary-teal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+    </style>
 
 </head>
 <body>
@@ -36,6 +54,11 @@
                 
 
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+                <div id="loading" class="loading" style="display:none; text-align:center; margin: 15px 0;">
+                    <div class="spinner"></div>
+                     <p>Logging in...</p>
+                    </div>
 
                 <div id="error" class="form-text error"></div>
             </form>

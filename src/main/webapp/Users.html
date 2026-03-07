@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" /><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1068,7 +1070,7 @@ async function saveNewUser() {
 
     async function fetchActivityLogs(userId) {
         const token = getAuthToken();
-        console.log('Fetching activity logs for user ID:',token );
+   
         try {
             const response = await fetch(BASE_URL + `api/admin/activity?userId=${userId}`, {
                 headers: {

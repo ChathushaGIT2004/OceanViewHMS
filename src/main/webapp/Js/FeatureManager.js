@@ -46,7 +46,7 @@ async function loadRoleFeatures() {
         console.log(features);
 
         // ✅ Store features in localStorage
-        localStorage.setItem("features", JSON.stringify(features));
+        sessionStorage.setItem("features", JSON.stringify(features));
 
         return features;
 
@@ -61,7 +61,7 @@ async function loadRoleFeatures() {
 // 📖 Get Stored Features
 // ==========================
 function getStoredFeatures() {
-    const data = localStorage.getItem("features");
+    const data = sessionStorage.getItem("features");
     return data ? JSON.parse(data) : [];
 }
 
@@ -78,6 +78,6 @@ function hasFeature(featureName) {
 // 🚪 Logout Helper
 // ==========================
 function clearAuthData() {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("features");
+    sessionStorage.removeItem("authToken");
+    sessionStorage.removeItem("features");
 }

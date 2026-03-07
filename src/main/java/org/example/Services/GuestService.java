@@ -84,6 +84,7 @@ public class GuestService {
     }
 
     public List<Guest> getAllGuests() {
+
         try {
             return guestDAO.findAll();
         } catch (Exception e) {

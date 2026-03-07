@@ -1,11 +1,15 @@
 // Js/Navbar.js
 
+
+
 const sidebarPages = [
-     { href: "Billing.html", icon: "fa-file-invoice", title: "Billing", feature: "ACCESS_BILLING_PAGE" },
-    { href: "Reservation.html", icon: "fa-calendar-check", title: "Reservations", feature: "ACCESS_RESERVATIONPAGE" },
-    { href: "Users.html", icon: "fa-users", title: "Users", feature: "ACCESS_USERSPAGE" },
-     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOM_PAGE" },
-    { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: "ACCESS_PROFILE_PAGE" },
+     { href: "Billing.html", icon: "fa-file-invoice", title: "Billing", feature: 'ACCESS_BILLING_PAGE' },
+    { href: "Reservation.html", icon: "fa-calendar-check", title: "Reservations", feature:'ACCESS_RESERVATIONPAGE' },
+    { href: "Users.html", icon: "fa-users", title: "Users", feature:'ACCESS_USERSPAGE' },
+     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature:'ACCESS_ROOM_PAGE' },
+      { href: "Guests.html", icon: "fa-user-friends", title: "Guests", feature: 'ACCESS_GUEST_PAGE' },
+    { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: 'ACCESS_PROFILE_PAGE' },
+     
    
 ];
 
@@ -14,6 +18,8 @@ const Suffix = " <a href='Help.html' class='sidebar-nav-item'><i class='fas fa-q
                "<a href='Logout.html' id='logoutBtn' class='sidebar-nav-item'><i class='fas fa-sign-out-alt'></i><span>Logout</span></a>";
 
 function populateSidebar() {
+ 
+
     const tvnavUSername = document.getElementById('navUsername');
     const tvnavRole= document.getElementById('navRoleid');
    
@@ -24,9 +30,7 @@ function populateSidebar() {
         tvnavRole.textContent = sessionStorage.getItem("userRole") || "Unknown Role";   
     }
                
-
-   // tvnavUSername.textContent = sessionStorage.getItem("username") || "Unknown User";
-    //tvnavRole.textContent = sessionStorage.getItem("role") || "Unknown Role";   
+ 
 
     const nav = document.getElementById('sidebarNav');
 

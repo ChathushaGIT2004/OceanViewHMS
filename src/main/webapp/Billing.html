@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" /><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -659,7 +661,7 @@
 
     const BASE_URL = 'http://localhost:8080/Ocean-View-System'; // change as needed
     const token = sessionStorage.getItem("token");
-    console.log("Auth token "+token);
+    
 
     // Feature key for billing analytics
     const FEATURE_BILLING_ANALYTICS = 'VIEW_BILLING_ANALYTICS'; // adjust to your actual feature name
@@ -713,7 +715,7 @@
             return;
         }
 
-        console.log("token "+token);
+         
 
         const billableItem = {
             Id: currentReservationId,
@@ -916,7 +918,7 @@
                 const tbody = document.querySelector("#reservationsTable tbody");
                 tbody.innerHTML = "";
 
-                console.log("Loaded reservations:", data);
+             
 
                 // 🔹 Filter only billed reservations
                 const billedReservations = data.filter(r => r.status == "checkedout" || r.status == "checkedin");
@@ -1179,7 +1181,7 @@
 
                     if (b.paymentStatus.toLowerCase() == 'paid') {
                         buttoncontainer += `<button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>`;
-                        console.log(`Bill ${b.billID} is paid with gross price ${b.grossPrice}`);
+                        
                     }
                     buttoncontainer += `<button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>`;
 
@@ -1254,10 +1256,10 @@
             const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
             const paymentDate = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
             let buttoncontainer = '';
-            console.log(`Processing bill ${b.billID} with status ${b.paymentStatus}`);
+            
             if (b.paymentStatus.toLowerCase() != 'paid') {
                 buttoncontainer += `<button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>`;
-                console.log(`Bill ${b.billID} is unpaid, showing Pay button`);
+            
             }
             buttoncontainer += `<button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>`;
 
