@@ -4,6 +4,7 @@ import org.example.DTO.*;
 import org.example.Models.Billings.*;
 import org.example.Models.Guest;
 import org.example.Services.BillableItemHandler.BillableItemRegistry;
+import org.example.Util.EmailUtil;
 import org.example.Util.SessionManager;
 import org.example.dao.BillingDAO;
 import org.example.dao.impl.BillingDAOImpl;
@@ -18,6 +19,7 @@ public class BillingService {
     private final BillingItemService billingItemService;
     private final BillableItemRegistry registry;
     private final GuestService guestService;
+    private final EmailUtil emailUtil=new EmailUtil();
 
     public BillingService() {
         this.billingDAO = new BillingDAOImpl();
@@ -112,6 +114,24 @@ public class BillingService {
 
             Billing billing = billingDAO.findById(billID);
             billing.setItems(billingItemService.getItemsByBill(billID));
+            Guest guest= guestService.findGuestByID(billing.getGuestID());
+
+            String subject = "Payment Confirmation - Ocean View Hotel";
+            String body = String.format(
+                    "Dear %s,\n\n" +
+                            "We are pleased to confirm that your payment has been successfully received for your booking at Ocean View Hotel.\n\n" +
+                            "Booking Details:\n" +
+
+                            "Booking ID: %s\n" +
+
+                            "Amount Paid: %s\n\n" +
+                            "Thank you for choosing Ocean View Hotel. We look forward to welcoming you and ensuring a memorable stay.\n\n" +
+                            "Best regards,\n" +
+                            "Ocean View Hotel Team",
+                    billing.getBillID()   ,
+                    billing.getAmountPaid() );
+
+            emailUtil.sendPlainTextEmail(guest.getEmail(), subject, body);
 
 
             UserActivityLogService.getInstance().log(

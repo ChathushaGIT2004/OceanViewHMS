@@ -11,6 +11,7 @@ import org.example.Models.Room.RoomAllocation;
 import org.example.Models.Room.RoomType;
 import org.example.Models.Session;
 import org.example.Models.User.UserActivityLog;
+import org.example.Util.EmailUtil;
 import org.example.Util.SessionManager;
 import org.example.dao.ReservationDAO;
 import org.example.dao.RoomTypeDAO;
@@ -28,6 +29,8 @@ public class ReservationService {
     private final RoomTypeDAO roomTypeDAO;
     private final RoomAllocationService allocationService;
     private final RoomService roomService;
+    private final EmailUtil emailUtil=new EmailUtil();
+    private  final GuestService guestService=new GuestService();
 
     public ReservationService() {
         try {
@@ -105,6 +108,42 @@ public class ReservationService {
         reservation.setTotalAmount(totalAmount);
         reservation.setRoomAllocationList(allocations);
         reservationDAO.update(reservation);
+
+        String subject = "Reservation Confirmation - Ocean View Hotel";
+
+        StringBuilder rooms = new StringBuilder();
+
+        reservation.getRoomAllocationList().forEach(room -> {
+            rooms.append("Room No: ").append(room.getRoom().getRoomID()).append("\n");
+        });
+
+
+
+
+        String body = String.format(
+                "Dear %s,\n\n" +
+                        "We are delighted to confirm your reservation at Ocean View Hotel.\n\n" +
+                        "Reservation Details:\n" +
+                        "Guest Name: %s\n" +
+                        "Reservation ID: %s\n" +
+                        "Check-in Date: %s\n" +
+                        "Check-out Date: %s\n" +
+                        "Room Numbers : %s\n" +
+                        "Number of Guests: %d\n\n" +
+                        "Room Allocation Info\n"+rooms.toString()+
+                        "Thank you for choosing Ocean View Hotel. We look forward to providing you with a comfortable and memorable stay.\n\n" +
+                        "Best regards,\n" +
+                        "Ocean View Hotel",
+                guest.getFullName(),           // Guest name
+                guest.getFullName(),
+                reservation.getReservationID(),
+                reservation.getCheckInDate(),
+                reservation.getCheckOutDate(),
+                reservation.getRoomAllocationList(),
+                reservation.getNumberOfGuests()
+        );
+
+        emailUtil.sendPlainTextEmail(guest.getEmail(), subject, body);
 
         // Log activity
         UserActivityLogService.getInstance()
@@ -266,6 +305,8 @@ public class ReservationService {
     
     public boolean deleteReservation(String token, int reservationID) {
 
+        Reservation reserve= reservationDAO.getById(reservationID);
+        Guest guest = guestService.findGuestByID(reserve.getGuest().getGuestID());
         List<RoomAllocation> allocations =
                 allocationService.getByReservationId(reservationID);
 
@@ -279,6 +320,18 @@ public class ReservationService {
         }
 
         reservationDAO.delete(reservationID);
+        String message = String.format(
+                "Dear %s,\n\n" +
+                        "We regret to inform you that your reserved room(s) at Ocean View Hotel have been cancelled.\n\n" +
+                        "You will receive any applicable refunds as per our policy.\n\n" +
+                        "We apologize for the inconvenience and hope to serve you in the future.\n\n" +
+                        "Best regards,\n" +
+                        "Ocean View Hotel Team",
+                guest.getFullName()
+        );
+
+        emailUtil.sendPlainTextEmail(guest.getEmail(), "Room Cancellation Notice - Ocean View Hotel", message);
+
         return true;
     }
 

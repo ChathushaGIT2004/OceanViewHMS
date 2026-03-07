@@ -3,6 +3,7 @@ package org.example.Services;
 import org.example.DTO.GuestDTO;
 import org.example.Models.Guest;
 import org.example.Models.User.UserActivityLog;
+import org.example.Util.EmailUtil;
 import org.example.dao.GuestDAO;
 import org.example.dao.UserActivityLogDAO;
 import org.example.dao.impl.GuestDAOImpl;
@@ -17,6 +18,7 @@ public class GuestService {
 
     private final GuestDAO guestDAO;
     private  UserActivityLogService userActivityLogService;
+    private EmailUtil emailUtil=new EmailUtil();
 
     public GuestService() {
         this.guestDAO = new GuestDAOImpl();
@@ -53,6 +55,19 @@ public class GuestService {
         guest.setEmail(guestDTO.getEmail());
 
         guestDAO.save(guest);
+        String subject = "Welcome to Ocean View Hotel .";
+        String body = String.format(
+                "Dear %s,\n\n" +
+                        "You have been successfully added as a guest to our Oceam View Hotel Management Database.\n\n" +
+                        "Through this, you will receive our latest offers, updates, and exclusive promotions directly from us.\n\n" +
+                        "We are excited to have you with us!\n\n" +
+                        "Best regards,\n" +
+                        "OceanView Hotel Management",
+                guest.getFullName()
+        );
+
+        emailUtil.sendPlainTextEmail(guest.getEmail(), subject, body);
+
         System.out.println("Guest Saved");
          //adding Log
         UserActivityLogService.getInstance().log(

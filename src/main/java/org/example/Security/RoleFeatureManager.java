@@ -32,20 +32,20 @@ public class RoleFeatureManager {
 
                 Feature.ACCESS_USERSPAGE,
                 Feature.ACCESS_ROOMPAGE,
-                Feature.ACCESS_RESERVATIONPAGE,
+                Feature.ACCESS_RESERVATIONPAGE
                // Feature.ACCESS_GUEST_PAGE,
-                Feature.ACCESS_PROFILE_PAGE,
-                Feature.ACCESS_BILLING_PAGE
+               // Feature.ACCESS_PROFILE_PAGE,
+               // Feature.ACCESS_BILLING_PAGE
         ));
 
         // RECEPTIONIST permissions: Limited access
         roleFeatures.put("receptionist", Set.of(
 
 
-                Feature.ACCESS_BILLING_PAGE,
+              //  Feature.ACCESS_BILLING_PAGE,
                 Feature.ACCESS_RESERVATIONPAGE,
                 Feature.ACCESS_GUEST_PAGE,
-                Feature.ACCESS_PROFILE_PAGE,
+            //    Feature.ACCESS_PROFILE_PAGE,
 
                 Feature.CREATE_BILLING,
                 Feature.VIEW_BILLING,
