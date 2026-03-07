@@ -33,13 +33,7 @@
                     <input type="password" id="password" class="form-control" placeholder="Enter password" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="role">Role</label>
-                    <select id="role" class="form-control">
-                        <option value="Admin">Admin</option>
-                        <option value="Staff">Staff</option>
-                    </select>
-                </div>
+                
 
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
 

@@ -149,10 +149,7 @@
                 <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
                 <h2>Rooms Management</h2>
             </div>
-            <div class="header-right">
-                 <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-                 
-            </div>
+             
             
            
         </div>
@@ -314,10 +311,10 @@
     let editingRoomId = null;
     let editingRoomTypeId = null;
 
-    const BASE_URL = 'http://localhost:8080/Ocean-View-System/';   // BaseIRL unchanged
+    const BASE_URL = 'http://localhost:8080/Ocean-View-System/';    
     
     const token= sessionStorage.getItem('token');
-    console.log('Token in Rooms.js:', token);
+   
 
     // ==== Fetch Room Types ====
     function loadRoomTypes(){
@@ -692,13 +689,17 @@
         });
     }
 
-    document.getElementById('refreshBtn').addEventListener('click', function() {
-        loadRooms();
-        loadRoomTypes();
-    });
+    
 
 
      function initcontent(){
+
+
+        if (!hasFeature('ACCESS_ROOM_PAGE')) {
+        document.body.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:\'Segoe UI\',sans-serif; color:#1e2a38;"><h1>Access Denied</h1><p>You do not have permission to view this page.</p></div>';
+        throw new Error('User lacks ACCESS_USERSPAGE permission');
+    }
+
         AddRoomBtn=document.getElementById("AddRoomBtn");3
         AddRoomTypeBtn=document.getElementById("AddRoomTypeBtn");
 
@@ -719,6 +720,8 @@
      }        
 
     // ===== INIT =====
+
+    
     initcontent();
     loadRoomTypes();
     loadRooms();

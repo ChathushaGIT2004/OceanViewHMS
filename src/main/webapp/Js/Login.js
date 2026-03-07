@@ -31,7 +31,7 @@
 
 
 clearAuthData() ;
-     BASE_URL = getBaseUrl(); // global function from config.js
+     BASE_URL = getBaseUrl();  
     document.addEventListener("DOMContentLoaded", function () {
 
         const loginForm = document.getElementById("loginForm");
@@ -42,15 +42,15 @@ clearAuthData() ;
 
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
-            const role = document.getElementById("role").value;
+             
 
-            errorDiv.textContent = ""; // clear previous errors
+            errorDiv.textContent = ""; 
 
             try {
                 const formData = new URLSearchParams();
                 formData.append("username", username);
                 formData.append("password", password);
-                formData.append("role", role);
+                 
 
                 // 🔥 Updated endpoint for AuthController
                 const response = await fetch("api/auth", {

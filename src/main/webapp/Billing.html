@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Billing Management</title>
+    <title>Billing Management · Gross price preview + Analytics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="Css/Styles.css"> 
+    <link rel="stylesheet" href="Css/Styles.css">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-  
- 
-
         /* ===== SECTIONS (white cards) ===== */
         .section {
             background: white;
@@ -32,7 +31,7 @@
             border-bottom: 2px solid #eef4ff;
             padding-bottom: 12px;
         }
- 
+
         /* ===== BADGES ===== */
         .badge {
             display: inline-block;
@@ -216,6 +215,29 @@
             font-size: 1.1rem;
         }
 
+        /* Gross price preview card */
+        .gross-preview-card {
+            background: #eef4ff;
+            border-radius: 24px;
+            padding: 18px 24px;
+            margin-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #d4e0f0;
+        }
+        .gross-preview-card span:first-child {
+            font-weight: 600;
+            color: #0a2540;
+            font-size: 1.1rem;
+        }
+        .gross-preview-card .gross-value {
+            font-weight: 800;
+            color: #2A7BE4;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
         /* Items table inside view modal */
         .modal-items-wrapper {
             max-height: 250px;
@@ -306,7 +328,30 @@
                 justify-content: space-between;
             }
         }
- 
+
+        /* ===== ANALYTICS CHARTS LAYOUT ===== */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .chart-card {
+            background: #f9fcff;
+            border-radius: 20px;
+            padding: 16px;
+        }
+        .chart-card h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--secondary-navy-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        canvas {
+            width: 100%;
+            max-height: 250px;
+        }
     </style>
 </head>
 <body>
@@ -332,10 +377,7 @@
                 <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
                 <h2>Rooms Management</h2>
             </div>
-            <div class="header-right">
-                 <button class="refresh-btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-                 
-            </div>
+             
             
            
         </div>
@@ -385,6 +427,28 @@
                     </div>    
         </div>
 
+        <!-- BILLING ANALYTICS SECTION (hidden by default, shown only if user has feature) -->
+        <div class="section" id="billingAnalyticsSection" style="display:none;">
+            <h2>📈 Billing Analytics</h2>
+            <div class="analytics-grid">
+                <!-- Chart 1: Monthly Revenue -->
+                <div class="chart-card">
+                    <h3>Revenue by Month</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <!-- Chart 2: Payment Method Distribution -->
+                <div class="chart-card">
+                    <h3>Payment Methods</h3>
+                    <canvas id="paymentMethodChart"></canvas>
+                </div>
+                <!-- Chart 3: Top Guests -->
+                <div class="chart-card">
+                    <h3>Top Guests</h3>
+                    <canvas id="topGuestsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
         <!-- RESERVATIONS SECTION -->
         <div class="section">
             <h2> Reservations (Available to Bill)</h2> 
@@ -418,13 +482,14 @@
                     <thead><tr><th>Bill ID</th><th>Guest</th><th>Total</th><th>Discount</th><th>Taxes</th><th>Status</th><th>Created</th><th>Payment Date</th><th>Actions</th></tr></thead>
                     <tbody></tbody>
                 </table>
-             
         </div>
+
+        
         </div>
     </div>
 </div>
 
-<!-- ========== GENERATE BILL MODAL - REDESIGNED ========== -->
+<!-- ========== GENERATE BILL MODAL - UPDATED WITH GROSS PREVIEW ========== -->
 <div id="generateBillModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -432,22 +497,29 @@
             <h2>Generate Bill</h2>
         </div>
         <div class="modal-body">
+            <input type="hidden" id="generateGuestId">  
             <div class="modal-info-grid">
                 <div class="modal-info-item">
                     <span class="label">Reservation ID</span>
                     <span class="value" id="modalReservationId">-</span>
                 </div>
                 <div class="modal-info-item">
-                    <span class="label">Total Amount</span>
+                    <span class="label">Base total</span>
                     <span class="value" id="modalTotalAmount">0.00</span>
                 </div>
             </div>
 
             <label for="modalDiscount">Discount (LKR)</label>
-            <input type="number" id="modalDiscount" value="0" min="0" step="0.01" placeholder="0.00">
+            <input type="number" id="modalDiscount" value="0" min="0" step="0.01" placeholder="0.00" oninput="updateGrossPreview()">
 
             <label for="modalTaxes">Taxes (LKR)</label>
-            <input type="number" id="modalTaxes" value="0" min="0" step="0.01" placeholder="0.00">
+            <input type="number" id="modalTaxes" value="0" min="0" step="0.01" placeholder="0.00" oninput="updateGrossPreview()">
+
+            <!-- GROSS PRICE PREVIEW CARD (requested feature) -->
+            <div class="gross-preview-card">
+                <span> Gross price</span>
+                <span class="gross-value" id="modalGrossPricePreview">0.00</span>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn-cancel" onclick="closeGenerateModal()">Cancel</button>
@@ -456,7 +528,7 @@
     </div>
 </div>
 
-<!-- ========== VIEW BILL MODAL - COMPLETELY REDESIGNED ========== -->
+<!-- ========== VIEW BILL MODAL ========== -->
 <div id="viewBillModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -481,7 +553,7 @@
             </div>
 
             <!-- Timestamps -->
-            <h3 style="font-size: 1.2rem; margin: 24px 0 12px; color: #0a2540; display: flex; gap: 8px;">⏱️ Timestamps</h3>
+            <h3 style="font-size: 1.2rem; margin: 24px 0 12px; color: #0a2540; display: flex; gap: 8px;">⏱ Timestamps</h3>
             <div class="modal-info-grid" style="margin-bottom: 20px;">
                 <div class="modal-info-item"><span class="label">Created</span> <span class="value" id="viewCreatedAt"></span></div>
                 <div class="modal-info-item"><span class="label">Updated</span> <span class="value" id="viewUpdatedAt"></span></div>
@@ -507,7 +579,7 @@
     </div>
 </div>
 
-<!-- ========== ADD ITEM MODAL - REDESIGNED ========== -->
+<!-- ========== ADD ITEM MODAL ========== -->
 <div id="addItemModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -539,7 +611,7 @@
     </div>
 </div>
 
-<!-- ========== PAY BILL MODAL - REDESIGNED ========== -->
+<!-- ========== PAY BILL MODAL ========== -->
 <div id="payBillModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -578,26 +650,54 @@
 <script src="Js/Config.js"></script>
 <script src="Js/FeatureManager.js"></script>
 <script src="Js/Navbar.js"></script>
-<!-- ========== JAVASCRIPT (unchanged, only IDs preserved) ========== -->
+<!-- ========== JAVASCRIPT ========== -->
 <script>
+    if (!hasFeature('ACCESS_BILLING_PAGE')) {
+        document.body.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:\'Segoe UI\',sans-serif; color:#1e2a38;"><h1>Access Denied</h1><p>You do not have permission to view this page.</p></div>';
+        throw new Error('User lacks ACCESS_BILLING_PAGE permission');
+    }
+
     const BASE_URL = 'http://localhost:8080/Ocean-View-System'; // change as needed
-    let token = sessionStorage.getItem("authToken");
+    const token = sessionStorage.getItem("token");
     console.log("Auth token "+token);
 
+    // Feature key for billing analytics
+    const FEATURE_BILLING_ANALYTICS = 'VIEW_BILLING_ANALYTICS'; // adjust to your actual feature name
 
     let currentReservationId = null;
     let currentTotalAmount = 0;
     let currentPayBillId = null;
     let currentViewBillId = null;
 
+    // ----- GROSS PRICE PREVIEW (for generate modal) -----
+    function updateGrossPreview() {
+        const totalEl = document.getElementById('modalTotalAmount');
+        const discountEl = document.getElementById('modalDiscount');
+        const taxesEl = document.getElementById('modalTaxes');
+        const grossSpan = document.getElementById('modalGrossPricePreview');
+
+        if (!totalEl || !discountEl || !taxesEl || !grossSpan) return;
+
+        const total = parseFloat(totalEl.innerText) || 0;
+        const discount = parseFloat(discountEl.value) || 0;
+        const taxes = parseFloat(taxesEl.value) || 0;
+
+        // gross = base total - discount + taxes  (typical hotel logic)
+        const gross = total - discount + taxes;
+        grossSpan.innerText = gross.toFixed(2);
+    }
+
     // ----- GENERATE BILL -----
-    function generateBilling(reservationID, totalAmount) {
+    function generateBilling(reservationID,guestID,totalAmount) {
         currentReservationId = reservationID;
         currentTotalAmount = totalAmount;
         document.getElementById('modalReservationId').innerText = reservationID;
-        document.getElementById('modalTotalAmount').innerText = totalAmount;
+        document.getElementById('generateGuestId').value = guestID;
+        document.getElementById('modalTotalAmount').innerText = totalAmount.toFixed(2);
         document.getElementById('modalDiscount').value = 0;
         document.getElementById('modalTaxes').value = 0;
+        // immediately update gross preview
+        updateGrossPreview();
         document.getElementById('generateBillModal').classList.add('show');
     }
     function closeGenerateModal() {
@@ -606,14 +706,13 @@
     function submitGenerateBill() {
         const discount = parseFloat(document.getElementById('modalDiscount').value);
         const taxes = parseFloat(document.getElementById('modalTaxes').value);
+        const guestID = document.getElementById('generateGuestId').value;
 
         if (isNaN(discount) || discount < 0 || isNaN(taxes) || taxes < 0) {
             alert("Please enter valid non-negative numbers.");
             return;
         }
 
-
-        const token = sessionStorage.getItem('authToken');
         console.log("token "+token);
 
         const billableItem = {
@@ -626,7 +725,7 @@
             token,       // <-- include token here
             discount,
             taxes,
-            guestId: currentReservationId, // assuming guestId is reservationID; change if different
+            guestId: guestID,  
             billableItem
         };
 
@@ -648,6 +747,7 @@
                 console.error(err);
             });
     }
+    
     // ----- VIEW BILL -----
     function viewBill(billID) {
         currentViewBillId = billID;
@@ -806,49 +906,264 @@
                 console.error(err);
             });
     }
+    
     // ----- LOAD RESERVATIONS -----
     function loadReservations() {
-    fetch(BASE_URL + '/api/reservations')
-        .then(res => res.json())
-        .then(data => {
+        fetch(BASE_URL + '/api/reservations')
+            .then(res => res.json())
+            .then(data => {
 
-            const tbody = document.querySelector("#reservationsTable tbody");
-            tbody.innerHTML = "";
+                const tbody = document.querySelector("#reservationsTable tbody");
+                tbody.innerHTML = "";
 
-            console.log("Loaded reservations:", data);
+                console.log("Loaded reservations:", data);
 
-            // 🔹 Filter only billed reservations
-            const billedReservations = data.filter(r => r.status == "checkedout" || r.status == "checkedin");
+                // 🔹 Filter only billed reservations
+                const billedReservations = data.filter(r => r.status == "checkedout" || r.status == "checkedin");
 
-            billedReservations.forEach(r => {
+                billedReservations.forEach(r => {
 
-                const tr = document.createElement("tr");
+                    const tr = document.createElement("tr");
 
-                tr.innerHTML = `
-                    <td>${r.ReservationID}</td>
-                    <td>${r.guestFullname}</td>
-                    <td>${r.checkIn}</td>
-                    <td>${r.checkOut}</td>
-                    <td>${r.totalAmount}</td>
-                     
-                    <td>
-                        <button class="btn btn-primary btn-sm"
-                            onclick="generateBilling(${r.reservationID}, ${r.totalAmount})">
-                            Generate
-                        </button>
-                    </td>
-                `;
+                    tr.innerHTML = `
+                        <td>${r.ReservationID}</td>
+                        <td>${r.guestFullname}</td>
+                        <td>${r.checkIn}</td>
+                        <td>${r.checkOut}</td>
+                        <td>${r.totalAmount}</td>
+                         
+                        <td>
+                            <button class="btn btn-primary btn-sm"
+                                onclick="generateBilling(${r.ReservationID}, ${r.guestID}, ${r.totalAmount})">
+                                Generate
+                            </button>
+                        </td>
+                    `;
 
-                tbody.appendChild(tr);
+                    tbody.appendChild(tr);
+                });
+
+                window.reservationsForBilling = billedReservations;
+
+            })
+            .catch(err => console.error("Error loading reservations:", err));
+    }
+
+    // ================== Billing Analysis ViewModel ==================
+    class BillingAnalysisViewModel {
+        constructor(bills) {
+            this.bills = bills || [];
+        }
+
+        setBills(bills) {
+            this.bills = bills || [];
+        }
+
+        totalBills() {
+            return this.bills.length;
+        }
+
+        totalPaidBills() {
+            return this.bills.filter(b => b.paymentStatus === 'Paid').length;
+        }
+
+        totalUnpaidBills() {
+            return this.bills.filter(b => b.paymentStatus !== 'Paid').length;
+        }
+
+        totalRevenue() {
+            return this.bills
+                .filter(b => b.paymentStatus === 'Paid')
+                .reduce((sum, b) => sum + (b.grossPrice || 0), 0);
+        }
+
+        totalOutstanding() {
+            return this.bills
+                .filter(b => b.paymentStatus !== 'Paid')
+                .reduce((sum, b) => sum + (b.balanceDue || b.grossPrice || 0), 0);
+        }
+
+        averageBillAmount() {
+            const paid = this.bills.filter(b => b.paymentStatus === 'Paid');
+            if (paid.length === 0) return 0;
+            return paid.reduce((sum, b) => sum + (b.grossPrice || 0), 0) / paid.length;
+        }
+
+        averageDiscount() {
+            const withDiscount = this.bills.filter(b => b.discount > 0);
+            if (withDiscount.length === 0) return 0;
+            return withDiscount.reduce((sum, b) => sum + (b.discount || 0), 0) / withDiscount.length;
+        }
+
+        averageTaxes() {
+            const withTaxes = this.bills.filter(b => b.taxes > 0);
+            if (withTaxes.length === 0) return 0;
+            return withTaxes.reduce((sum, b) => sum + (b.taxes || 0), 0) / withTaxes.length;
+        }
+
+        paidRatio() {
+            if (this.totalBills() === 0) return 0;
+            return (this.totalPaidBills() / this.totalBills() * 100).toFixed(1);
+        }
+
+        unpaidRatio() {
+            if (this.totalBills() === 0) return 0;
+            return (this.totalUnpaidBills() / this.totalBills() * 100).toFixed(1);
+        }
+
+        revenueByMonth() {
+            const months = {};
+            this.bills.forEach(b => {
+                if (b.paymentStatus === 'Paid' && b.createdAt) {
+                    const date = new Date(b.createdAt);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    months[monthKey] = (months[monthKey] || 0) + (b.grossPrice || 0);
+                }
             });
+            return months;
+        }
 
-            window.reservationsForBilling = billedReservations;
+        billsByMonth() {
+            const months = {};
+            this.bills.forEach(b => {
+                if (b.createdAt) {
+                    const date = new Date(b.createdAt);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    months[monthKey] = (months[monthKey] || 0) + 1;
+                }
+            });
+            return months;
+        }
 
-        })
-        .catch(err => console.error("Error loading reservations:", err));
-}
+        topGuests(limit = 5) {
+            const guestSpending = {};
+            this.bills
+                .filter(b => b.paymentStatus === 'Paid' && b.guest)
+                .forEach(b => {
+                    const guestId = b.guest.guestID || b.guest.id;
+                    const guestName = b.guest.fullName || b.guest.name || 'Unknown';
+                    if (!guestSpending[guestId]) {
+                        guestSpending[guestId] = { name: guestName, total: 0 };
+                    }
+                    guestSpending[guestId].total += (b.grossPrice || 0);
+                });
 
-    // ----- LOAD BILLINGS -----
+            return Object.values(guestSpending)
+                .sort((a, b) => b.total - a.total)
+                .slice(0, limit);
+        }
+
+        paymentMethodDistribution() {
+            const methods = {};
+            this.bills
+                .filter(b => b.paymentStatus === 'Paid' && b.paymentMethod)
+                .forEach(b => {
+                    const method = b.paymentMethod;
+                    methods[method] = (methods[method] || 0) + 1;
+                });
+            return methods;
+        }
+
+        itemTypeDistribution() {
+            const types = {};
+            this.bills.forEach(b => {
+                if (b.items && Array.isArray(b.items)) {
+                    b.items.forEach(item => {
+                        const type = item.itemType || 'Other';
+                        types[type] = (types[type] || 0) + 1;
+                    });
+                }
+            });
+            return types;
+        }
+    }
+
+    // Global variables for analytics
+    let analysisVM = null;
+    let billingAnalyticsCharts = {};
+
+    // ----- RENDER CHARTS -----
+    function renderBillingCharts(vm) {
+        // Destroy old charts if they exist (prevents duplication)
+        Object.values(billingAnalyticsCharts).forEach(chart => chart.destroy());
+        billingAnalyticsCharts = {};
+
+        // Revenue by Month (bar chart)
+        const revenueByMonth = vm.revenueByMonth();
+        const months = Object.keys(revenueByMonth).sort();
+        const revenueData = months.map(m => revenueByMonth[m]);
+
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        billingAnalyticsCharts.revenue = new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Revenue (LKR)',
+                    data: revenueData,
+                    backgroundColor: '#3a5f6b',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Payment Method Distribution (pie chart)
+        const methodDist = vm.paymentMethodDistribution();
+        const methods = Object.keys(methodDist);
+        const methodCounts = methods.map(m => methodDist[m]);
+
+        const ctxMethod = document.getElementById('paymentMethodChart').getContext('2d');
+        billingAnalyticsCharts.paymentMethod = new Chart(ctxMethod, {
+            type: 'pie',
+            data: {
+                labels: methods,
+                datasets: [{
+                    data: methodCounts,
+                    backgroundColor: ['#3a5f6b', '#fff350']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Top Guests (horizontal bar chart)
+        const topGuests = vm.topGuests(5);
+        const guestNames = topGuests.map(g => g.name);
+        const guestSpending = topGuests.map(g => g.total);
+
+        const ctxGuests = document.getElementById('topGuestsChart').getContext('2d');
+        billingAnalyticsCharts.topGuests = new Chart(ctxGuests, {
+            type: 'bar',
+            data: {
+                labels: guestNames,
+                datasets: [{
+                    label: 'Total Spent (LKR)',
+                    data: guestSpending,
+                    backgroundColor: '#3a5f6b',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // ----- LOAD BILLINGS (enhanced with analytics) -----
     function loadBillings() {
         fetch(BASE_URL + '/api/billing/all')
             .then(res => res.json())
@@ -860,6 +1175,14 @@
                     const statusClass = b.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid';
                     const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
                     const paymentDate = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
+                    let buttoncontainer = '';
+
+                    if (b.paymentStatus.toLowerCase() == 'paid') {
+                        buttoncontainer += `<button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>`;
+                        console.log(`Bill ${b.billID} is paid with gross price ${b.grossPrice}`);
+                    }
+                    buttoncontainer += `<button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>`;
+
                     tr.innerHTML = `
                         <td>${b.billID}</td>
                         <td>${b.guest ? (b.guest.fullName || b.guest.name || 'N/A') : 'N/A'}</td>
@@ -869,15 +1192,31 @@
                         <td><span class="badge ${statusClass}">${b.paymentStatus || 'Unpaid'}</span></td>
                         <td>${createdAt}</td>
                         <td>${paymentDate}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>
-                            <button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>
-                        </td>
+                        <td>${buttoncontainer}</td>
                     `;
                     tbody.appendChild(tr);
                 });
                 window.allBillings = data;
                 updateBillingMetrics(data);
+
+                 
+                if (hasFeature(FEATURE_BILLING_ANALYTICS)) {
+                    // Create or update the viewmodel
+                    if (!analysisVM) {
+                        analysisVM = new BillingAnalysisViewModel(data);
+                    } else {
+                        analysisVM.setBills(data);
+                    }
+
+                    // Show the analytics section
+                    document.getElementById('billingAnalyticsSection').style.display = 'block';
+
+                    // Render charts
+                    renderBillingCharts(analysisVM);
+                } else {
+                    // Hide the section if feature not allowed
+                    document.getElementById('billingAnalyticsSection').style.display = 'none';
+                }
             })
             .catch(err => console.error("Error loading billings:", err));
     }
@@ -914,6 +1253,14 @@
             const statusClass = b.paymentStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid';
             const createdAt = b.createdAt ? new Date(b.createdAt).toLocaleString() : 'N/A';
             const paymentDate = b.paymentDate ? new Date(b.paymentDate).toLocaleString() : 'N/A';
+            let buttoncontainer = '';
+            console.log(`Processing bill ${b.billID} with status ${b.paymentStatus}`);
+            if (b.paymentStatus.toLowerCase() != 'paid') {
+                buttoncontainer += `<button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>`;
+                console.log(`Bill ${b.billID} is unpaid, showing Pay button`);
+            }
+            buttoncontainer += `<button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>`;
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${b.billID}</td>
@@ -921,13 +1268,10 @@
                 <td>${b.grossPrice.toFixed(2)}</td>
                 <td>${b.discount.toFixed(2)}</td>
                 <td>${b.taxes.toFixed(2)}</td>
-                <td><span class="badge ${statusClass}">${b.paymentStatus || 'Unpaid'}</span></td>
+                <td><span class="badge ${statusClass}">${b.paymentStatus || 'PENDING'}</span></td>
                 <td>${createdAt}</td>
                 <td>${paymentDate}</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="viewBill(${b.billID})">View</button>
-                    <button class="btn btn-success btn-sm" onclick="payBill(${b.billID})">Pay</button>
-                </td>
+                <td>${buttoncontainer} </td>
             `;
             tbody.appendChild(tr);
         });

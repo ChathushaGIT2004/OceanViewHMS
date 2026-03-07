@@ -4,7 +4,7 @@ const sidebarPages = [
      { href: "Billing.html", icon: "fa-file-invoice", title: "Billing", feature: "ACCESS_BILLING_PAGE" },
     { href: "Reservation.html", icon: "fa-calendar-check", title: "Reservations", feature: "ACCESS_RESERVATIONPAGE" },
     { href: "Users.html", icon: "fa-users", title: "Users", feature: "ACCESS_USERSPAGE" },
-     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOMPAGE" },
+     { href: "Rooms.html", icon: "fa-bed", title: "Rooms", feature: "ACCESS_ROOM_PAGE" },
     { href: "Profile.html", icon: "fa-user-circle", title: "Profile", feature: "ACCESS_PROFILE_PAGE" },
    
 ];

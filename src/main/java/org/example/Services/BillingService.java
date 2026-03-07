@@ -20,6 +20,7 @@ public class BillingService {
     private final BillableItemRegistry registry;
     private final GuestService guestService;
     private final EmailUtil emailUtil=new EmailUtil();
+    private final  ReservationService reservationService=new ReservationService();
 
     public BillingService() {
         this.billingDAO = new BillingDAOImpl();
@@ -38,7 +39,9 @@ public class BillingService {
             }
 
             BillableItemDTO dto = req.getBillableItem();
+            System.out.println("Bill generate Request Accepted \nBill ID"+dto.getId()+"\nItemType="+dto.getItemType());
             if (dto == null) return failure("Billable item is missing");
+            System.out.println(dto.getItemType()+"\n"+dto.getPrice());
 
             // Fetch real BillableItem via registry
             BillableItem item = registry.fetchItem(dto.getItemType(), dto.getId());
@@ -74,11 +77,15 @@ public class BillingService {
             // Save BILL using DAO
             ResponseMessageDTO billingResponse = billingDAO.save(billing);
 
+
+
             int billID = (int) billingResponse.getData();
             billing.setBillID(billID);
 
             // Save BILL ITEM
             billingItemService.addItemToBill(billID, billingItem);
+            registry.markItemAsBilled(item);
+
 
 
             UserActivityLogService.getInstance().log(
@@ -122,14 +129,12 @@ public class BillingService {
                             "We are pleased to confirm that your payment has been successfully received for your booking at Ocean View Hotel.\n\n" +
                             "Booking Details:\n" +
 
-                            "Booking ID: %s\n" +
+                            "Booking ID: "+billing.getBillID() +"\n" +
 
-                            "Amount Paid: %s\n\n" +
+                            "Amount Paid: "+billing.getAmountPaid()+"\n\n" +
                             "Thank you for choosing Ocean View Hotel. We look forward to welcoming you and ensuring a memorable stay.\n\n" +
                             "Best regards,\n" +
-                            "Ocean View Hotel Team",
-                    billing.getBillID()   ,
-                    billing.getAmountPaid() );
+                            "Ocean View Hotel Team" );
 
             emailUtil.sendPlainTextEmail(guest.getEmail(), subject, body);
 

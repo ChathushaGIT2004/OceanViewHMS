@@ -31,27 +31,30 @@ public class RoleFeatureManager {
                 Feature.VIEW_ACTIVITY_LOGS,
 
                 Feature.ACCESS_USERSPAGE,
-                Feature.ACCESS_ROOMPAGE,
-                Feature.ACCESS_RESERVATIONPAGE
-               // Feature.ACCESS_GUEST_PAGE,
-               // Feature.ACCESS_PROFILE_PAGE,
-               // Feature.ACCESS_BILLING_PAGE
+                Feature.ACCESS_ROOM_PAGE,
+                Feature.ACCESS_RESERVATIONPAGE,
+                Feature.ACCESS_GUEST_PAGE,
+                 Feature.ACCESS_PROFILE_PAGE,
+                 Feature.ACCESS_BILLING_PAGE,
+
+                Feature.VIEW_BILLING_ANALYTICS,
+                Feature.VIEW_RESERVATION_ANALYTICS
         ));
 
         // RECEPTIONIST permissions: Limited access
         roleFeatures.put("receptionist", Set.of(
 
 
-              //  Feature.ACCESS_BILLING_PAGE,
+                Feature.ACCESS_BILLING_PAGE,
                 Feature.ACCESS_RESERVATIONPAGE,
                 Feature.ACCESS_GUEST_PAGE,
-            //    Feature.ACCESS_PROFILE_PAGE,
+
 
                 Feature.CREATE_BILLING,
                 Feature.VIEW_BILLING,
                 Feature.DELETE_BILLING,
                 Feature.UPDATE_PASSWORD,
-
+                Feature.ACCESS_PROFILE_PAGE,
                 Feature.VIEW_ROOMS,
                 Feature.CREATE_RESERVATION,
                 Feature.UPDATE_RESERVATION,
